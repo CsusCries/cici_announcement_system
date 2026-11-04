@@ -7,6 +7,7 @@
 <style>
 :root{--blue:#1d4ed8;--blue-d:#1e3a8a;--blue-600:#2563eb;--blue-100:#e0eaff;--blue-50:#f2f6ff;--white:#fff;--text:#0f1c3f;--muted:#5b6b84;--border:#e2e8f0;--red:#c81e1e;--green:#0f6b55;--green-bg:#d9f5ee;--amber:#8a5a00;--amber-bg:#fff1d6}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--blue-50);color:var(--text)}
 button{font:inherit;cursor:pointer;color:inherit}
 a{color:var(--blue)}
@@ -177,6 +178,7 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
   .top .r{width:100%}.top .r .btn{flex:1}
 }
 </style>
+<script src="config.js"></script>
 </head>
 <body>
 <div class="app">
@@ -186,12 +188,13 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
       <button data-go="dash"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</button>
       <button data-go="ann"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>Announcements <span class="count" id="cAnn"></span></button>
       <button data-go="cal"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Calendar</button>
-      <button data-go="users"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>Users <span class="count" id="cUsers"></span></button>
+      <button data-go="users" id="navUsers"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>Users <span class="count" id="cUsers"></span></button>
       <hr>
       <button data-go="settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</button>
       <button data-act="student"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Student view</button>
+      <button data-act="signout"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button>
     </nav>
-    <div class="who"><div class="avatar">AD</div><div><b>Admin</b><small id="orgName">CICI</small></div></div>
+    <div class="who"><div class="avatar" id="meInit"></div><div><b id="meName"></b><small><span id="meRole"></span> · <span id="orgName">CICI</span></small></div></div>
   </aside>
 
   <main class="main">
@@ -257,8 +260,7 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
     <!-- USERS -->
     <section id="v-users" hidden>
       <div class="top">
-        <div><h1>Users</h1><p>Manage roles and access</p></div>
-        <div class="r"><button class="btn primary" data-act="invite">+ Add user</button></div>
+        <div><h1>Users</h1><p>People join by creating an account on the sign-in page. Change roles or suspend access here.</p></div>
       </div>
       <div class="toolbar">
         <label class="search"><span aria-hidden="true">🔍</span><input id="uq" type="search" placeholder="Search name or email…" aria-label="Search users"></label>
@@ -276,14 +278,14 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
     <section id="v-settings" hidden>
       <div class="top"><div><h1>Settings</h1><p>System preferences</p></div></div>
       <div class="panel">
-        <div class="setrow"><span>Organization name<small>Shown in the admin sidebar</small></span><input id="sOrg" maxlength="40" style="font:inherit;border:1px solid var(--border);border-radius:10px;padding:9px 11px"></div>
-        <div class="setrow"><span>Default audience<small>Pre-selected when creating announcements</small></span>
+        <div class="setrow"><span>Organization name<small>Shown in the admin sidebar (this device)</small></span><input id="sOrg" maxlength="40" style="font:inherit;border:1px solid var(--border);border-radius:10px;padding:9px 11px"></div>
+        <div class="setrow"><span>Default audience<small>Pre-selected when creating announcements (this device)</small></span>
           <select id="sAud"><option>All students</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Faculty</option></select></div>
         <div class="setrow"><span>New posts start as draft<small>Otherwise they publish immediately</small></span><input type="checkbox" id="sDraft"></div>
         <div class="setrow"><span>Student site<small>See what students see</small></span><a class="btn" href="index.html" target="_blank" rel="noopener">Open student view ↗</a></div>
-        <div class="setrow"><span>Reset demo data<small>Restores sample announcements and users, clears activity log</small></span><button class="btn danger" data-act="reset">Reset</button></div>
+        <div class="setrow" id="resetRow"><span>Reset demo data<small>Restores sample announcements and users, clears activity log</small></span><button class="btn danger" data-act="reset">Reset</button></div>
       </div>
-      <p style="color:var(--muted);margin-top:14px">This admin panel is a front-end demo: data is saved in this browser only and there is no sign-in protecting it yet.</p>
+      <p style="color:var(--muted);margin-top:14px" id="modeNote"></p>
     </section>
   </main>
 </div>
@@ -329,55 +331,18 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
   </form>
 </dialog>
 
-<!-- user editor -->
-<dialog id="userDlg" class="small">
-  <form class="dbox" id="uform" novalidate>
-    <h3 id="uTitle">Add user</h3>
-    <label class="fld">Full name<input name="name" maxlength="60" required></label>
-    <label class="fld">Email<input name="email" type="email" maxlength="80" required></label>
-    <label class="fld">Role<select name="role"><option>Student</option><option>Faculty</option><option>Admin</option></select></label>
-    <div class="err" id="uErr" role="alert"></div>
-    <div class="dacts"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div>
-  </form>
-</dialog>
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script>
-/* ---------- shared data (same keys the student page reads) ---------- */
-const SEED = [
-  { id: 1, type: 'event', title: 'CICI Week 2026', date: '2026-11-15', end: '2026-11-21', where: 'Main Campus', pinned: true, body: 'A week of fun, learning, and community!', status: 'published', audience: 'All students', signups: 142 },
-  { id: 2, type: 'activity', title: 'Green Campus Initiative', date: '2026-11-10', end: '2026-11-30', where: 'Campus Grounds', body: 'Join our tree planting activity.', status: 'published', audience: 'All students', signups: 64 },
-  { id: 3, type: 'exam', title: 'Midterm Examination', date: '2026-11-20', where: 'Online', body: 'Coverage: Modules 1–5.', status: 'published', audience: '2nd year', signups: 0 },
-  { id: 4, type: 'activity', title: 'Activity Deadline', date: '2026-11-30', where: 'Student Affairs Office', body: 'Last day to submit your activity sign-up form.', status: 'published', audience: 'All students', signups: 23 },
-  { id: 5, type: 'event', title: 'Freshmen Orientation', date: '2026-11-09', where: 'Auditorium', body: 'Welcome session, campus tour and club sign-ups.', status: 'published', audience: '1st year', signups: 198 },
-  { id: 6, type: 'exam', title: 'Data Structures Quiz', date: '2026-11-12', where: 'Room 105', body: 'Chapters 4–6. Bring your student ID.', status: 'published', audience: '2nd year', signups: 0 },
-  { id: 7, type: 'event', title: 'Career Fair', date: '2026-12-03', where: 'Gym B', body: 'Meet employers and bring printed CVs.', status: 'draft', audience: '4th year', signups: 0 },
-];
-const SEED_USERS = [
-  { id: 1, name: 'Paul Abian', email: 'paul.abian@student.cici.edu', role: 'Student', active: true },
-  { id: 2, name: 'Maria Santos', email: 'maria.santos@student.cici.edu', role: 'Student', active: true },
-  { id: 3, name: 'John Reyes', email: 'john.reyes@student.cici.edu', role: 'Student', active: true },
-  { id: 4, name: 'Ana Cruz', email: 'ana.cruz@student.cici.edu', role: 'Student', active: false },
-  { id: 5, name: 'Prof. L. Garcia', email: 'l.garcia@cici.edu', role: 'Faculty', active: true },
-  { id: 6, name: 'Prof. R. Mendoza', email: 'r.mendoza@cici.edu', role: 'Faculty', active: true },
-  { id: 7, name: 'Registrar Office', email: 'registrar@cici.edu', role: 'Admin', active: true },
-];
-const store = {
-  get(k, d) { try { const v = localStorage.getItem('cici.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('cici.' + k, JSON.stringify(v)); } catch {} },
-};
-const clone = (x) => JSON.parse(JSON.stringify(x));
-let items = store.get('items', null) || clone(SEED);
-let users = store.get('users', null) || clone(SEED_USERS);
-let log = store.get('adminLog', []);
-let cfg = Object.assign({ org: 'CICI', audience: 'All students', draftFirst: false }, store.get('adminCfg', {}));
-const save = () => { store.set('items', items); store.set('users', users); store.set('adminLog', log); store.set('adminCfg', cfg); };
-save();
+<script type="module">
+import { api, isAdmin, roleLabel, initials } from './js/data.js';
+
+/* ---------- sign-in gate: admins and faculty only ---------- */
+const me = await api.requireUser({ staff: true });
 
 /* ---------- helpers ---------- */
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function $(s) { return document.querySelector(s); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 const now = new Date(); const TODAY = iso(now.getFullYear(), now.getMonth(), now.getDate());
 const D = (s) => new Date(s + 'T00:00:00');
@@ -388,10 +353,6 @@ const daysUntil = (s) => Math.round((D(s) - D(TODAY)) / 86400000);
 const statusOf = (a) => a.status === 'draft' ? 'draft' : endOf(a) < TODAY ? 'ended' : 'published';
 const STATUS = { published: 'Published', draft: 'Draft', ended: 'Ended' };
 const TYPE = { event: 'Event', activity: 'Activity', exam: 'Exam' };
-const studentSignups = () => new Set(store.get('reg', []));
-const signups = (a) => (a.signups || 0) + (studentSignups().has(a.id) ? 1 : 0);
-const byId = (id) => items.find((a) => a.id == id);
-const nextId = () => Math.max(0, ...items.map((a) => a.id), ...store.get('custom', []).map((a) => a.id)) + 1;
 const I = {
   edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   pin: '<path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/>',
@@ -403,24 +364,59 @@ const I = {
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 let toastT;
-function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
-function addLog(msg) { log.unshift({ t: Date.now(), msg }); log = log.slice(0, 25); save(); }
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
 const ago = (t) => { const s = (Date.now() - t) / 1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s / 60)} min ago` : s < 86400 ? `${Math.floor(s / 3600)} h ago` : new Date(t).toLocaleDateString(); };
+async function run(fn, okMsg) {
+  try { await fn(); if (okMsg) toast(okMsg); }
+  catch (e) { toast('Error: ' + e.message); }
+  await refresh();
+}
+
+/* ---------- device settings ---------- */
+const pref = {
+  get(k, d) { try { const v = localStorage.getItem('cici.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('cici.' + k, JSON.stringify(v)); } catch {} },
+};
+let cfg = Object.assign({ org: 'CICI', audience: 'All students', draftFirst: false }, pref.get('adminCfg', {}));
+const saveCfg = () => pref.set('adminCfg', cfg);
+
+/* ---------- server data ---------- */
+let items = [], users = [], log = [], counts = new Map();
+const signups = (a) => counts.get(a.id) || 0;
+const byId = (id) => items.find((a) => a.id == id);
+async function refresh() {
+  try {
+    [items, counts, log, users] = await Promise.all([
+      api.listAnnouncements(), api.signupCounts(), api.listLog(), isAdmin(me) ? api.listProfiles() : Promise.resolve([]),
+    ]);
+  } catch (e) { toast('Couldn’t load data: ' + e.message); }
+  render();
+}
 
 /* ---------- state ---------- */
 const VIEWS = ['dash', 'ann', 'cal', 'users', 'settings'];
-let view = 'dash', selected = new Set(), editingId = null, editingUser = null;
+let view = 'dash', selected = new Set(), editingId = null;
 let calY = now.getFullYear(), calM = now.getMonth();
+
+/* ---------- who's signed in ---------- */
+$('#meName').textContent = me.name;
+$('#meRole').textContent = roleLabel(me.role);
+$('#meInit').textContent = initials(me.name);
+$('#navUsers').hidden = !isAdmin(me);
+$('#resetRow').hidden = api.live;
+$('#modeNote').textContent = api.live
+  ? 'Connected to Supabase. Announcements, sign-ups and users are shared by everyone; organization name and defaults are saved on this device.'
+  : 'Demo mode: Supabase isn’t connected yet (see supabase/README.md), so data is saved in this browser only.';
 
 /* ---------- views ---------- */
 function go(v) {
   view = VIEWS.includes(v) ? v : 'dash';
+  if (view === 'users' && !isAdmin(me)) view = 'dash';
   VIEWS.forEach((x) => ($('#v-' + x).hidden = x !== view));
   document.querySelectorAll('#nav [data-go]').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
   history.replaceState(null, '', '#' + view);
   render(); window.scrollTo({ top: 0 });
 }
-
 function render() {
   $('#cAnn').textContent = items.length;
   $('#cUsers').textContent = users.length;
@@ -434,6 +430,7 @@ function renderDash() {
   const soon = items.filter((a) => a.status !== 'draft' && ((daysUntil(a.date) >= 0 && daysUntil(a.date) <= 14) || (a.date <= TODAY && endOf(a) >= TODAY)))
     .sort((a, b) => a.date.localeCompare(b.date));
   const total = items.reduce((n, a) => n + signups(a), 0);
+  $('#greet').textContent = `Hi ${me.name.split(' ')[0]} — here’s what’s happening`;
   $('#stats').innerHTML = [
     ['Published', pub.length, 'live for students', 'published'],
     ['Drafts', drafts.length, 'not visible yet', 'draft'],
@@ -448,16 +445,17 @@ function renderDash() {
     : '<p class="empty">No admin activity yet.</p>';
   const top = items.filter((a) => a.type !== 'exam').sort((a, b) => signups(b) - signups(a)).slice(0, 5);
   const max = Math.max(1, ...top.map(signups));
-  $('#popular').innerHTML = top.map((a) => `
+  $('#popular').innerHTML = top.length ? top.map((a) => `
     <button class="li" data-edit="${a.id}"><span class="pill ${a.type}">${TYPE[a.type]}</span>
-      <span><b>${esc(a.title)}</b><span class="bar" style="width:min(260px,100%)"><i style="width:${(signups(a) / max) * 100}%"></i></span></span><b>${signups(a)}</b></button>`).join('');
+      <span><b>${esc(a.title)}</b><span class="bar" style="width:min(260px,100%)"><i style="width:${(signups(a) / max) * 100}%"></i></span></span><b>${signups(a)}</b></button>`).join('')
+    : '<p class="empty">No events or activities yet.</p>';
 }
 
 function tableItems() {
   const q = $('#q').value.trim().toLowerCase(), t = $('#fType').value, st = $('#fStatus').value, so = $('#fSort').value;
   return items.filter((a) => (!t || a.type === t) && (!st || statusOf(a) === st)
       && (!q || [a.title, a.where, a.body, a.audience].join(' ').toLowerCase().includes(q)))
-    .sort({ date: (a, b) => a.date.localeCompare(b.date), new: (a, b) => b.id - a.id, signups: (a, b) => signups(b) - signups(a), az: (a, b) => a.title.localeCompare(b.title) }[so]);
+    .sort({ date: (a, b) => a.date.localeCompare(b.date), new: (a, b) => (b.created || b.id) - (a.created || a.id), signups: (a, b) => signups(b) - signups(a), az: (a, b) => a.title.localeCompare(b.title) }[so]);
 }
 
 function renderTable() {
@@ -471,7 +469,7 @@ function renderTable() {
       <td data-l="Type"><span class="pill ${a.type}">${TYPE[a.type]}</span></td>
       <td data-l="Date">${range(a)}</td>
       <td data-l="Status"><span class="st ${s}">${STATUS[s]}</span></td>
-      <td data-l="Sign-ups">${a.type === 'exam' ? '<span class="sub">n/a</span>' : signups(a)}</td>
+      <td data-l="Sign-ups">${a.type === 'exam' ? `<span class="sub">${signups(a)} reminders</span>` : signups(a)}</td>
       <td><div class="acts">
         <button class="iconbtn" data-act="edit" data-id="${a.id}" title="Edit" aria-label="Edit">${icon('edit')}</button>
         <button class="iconbtn ${a.pinned ? 'on' : ''}" data-act="pin" data-id="${a.id}" title="${a.pinned ? 'Unpin' : 'Pin'}" aria-label="${a.pinned ? 'Unpin' : 'Pin'}" aria-pressed="${!!a.pinned}">${icon('pin')}</button>
@@ -504,17 +502,18 @@ function renderCal() {
 
 function renderUsers() {
   const q = $('#uq').value.trim().toLowerCase(), r = $('#uRole').value;
-  const list = users.filter((u) => (!r || u.role === r) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
-  $('#urows').innerHTML = list.length ? list.map((u) => `<tr>
-    <td data-l="Name"><span class="user"><span class="ua">${esc(u.name.split(/\s+/).filter((w) => /^[A-Za-z]/.test(w) && !w.endsWith('.')).map((w) => w[0]).slice(0, 2).join('') || '?')}</span><b>${esc(u.name)}</b></span></td>
+  const list = users.filter((u) => (!r || roleLabel(u.role) === r) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
+  $('#urows').innerHTML = list.length ? list.map((u) => {
+    const self = u.id === me.id;
+    return `<tr>
+    <td data-l="Name"><span class="user"><span class="ua">${esc(initials(u.name))}</span><b>${esc(u.name)}${self ? ' (you)' : ''}</b></span></td>
     <td data-l="Email">${esc(u.email)}</td>
-    <td data-l="Role"><select data-role="${u.id}" aria-label="Role for ${esc(u.name)}">${['Student', 'Faculty', 'Admin'].map((x) => `<option ${x === u.role ? 'selected' : ''}>${x}</option>`).join('')}</select></td>
+    <td data-l="Role"><select data-role="${esc(u.id)}" aria-label="Role for ${esc(u.name)}" ${self ? 'disabled title="You can’t change your own role"' : ''}>${['student', 'faculty', 'admin'].map((x) => `<option value="${x}" ${x === u.role ? 'selected' : ''}>${roleLabel(x)}</option>`).join('')}</select></td>
     <td data-l="Status"><span class="st ${u.active ? 'published' : 'draft'}">${u.active ? 'Active' : 'Suspended'}</span></td>
     <td><div class="acts">
-      <button class="iconbtn" data-act="uedit" data-id="${u.id}" title="Edit" aria-label="Edit">${icon('edit')}</button>
-      <button class="iconbtn" data-act="uactive" data-id="${u.id}" title="${u.active ? 'Suspend' : 'Reactivate'}" aria-label="${u.active ? 'Suspend' : 'Reactivate'}">${icon('power')}</button>
-      <button class="iconbtn del" data-act="udel" data-id="${u.id}" title="Remove" aria-label="Remove">${icon('trash')}</button>
-    </div></td></tr>`).join('') : '<tr><td colspan="5"><p class="empty">No users match.</p></td></tr>';
+      ${self ? '' : `<button class="iconbtn" data-act="uactive" data-id="${esc(u.id)}" title="${u.active ? 'Suspend' : 'Reactivate'}" aria-label="${u.active ? 'Suspend' : 'Reactivate'} ${esc(u.name)}">${icon('power')}</button>`}
+    </div></td></tr>`;
+  }).join('') : '<tr><td colspan="5"><p class="empty">No users match.</p></td></tr>';
 }
 
 function renderSettings() { $('#sOrg').value = cfg.org; $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
@@ -528,7 +527,6 @@ function openEditor(a, preset = {}) {
   $('#formDelete').hidden = !a;
   const src = a || { type: 'event', status: cfg.draftFirst ? 'draft' : 'published', date: TODAY, audience: cfg.audience, ...preset };
   for (const k of ['title', 'type', 'status', 'date', 'end', 'where', 'audience', 'body']) f.elements[k].value = src[k] || '';
-  if (a && a.status !== 'draft') f.elements.status.value = 'published';
   f.elements.pinned.checked = !!src.pinned;
   preview(); $('#editDlg').showModal(); f.elements.title.focus();
 }
@@ -548,42 +546,29 @@ function preview() {
   $('#pAud').textContent = 'Audience: ' + d.audience + (d.pinned ? ' · 📌 Pinned' : '');
 }
 $('#form').addEventListener('input', preview);
-$('#form').addEventListener('submit', (e) => {
+$('#form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const d = formData();
   if (!d.title) return ($('#formErr').textContent = 'Please add a title.');
   if (!d.date) return ($('#formErr').textContent = 'Please choose a start date.');
   if (d.end && d.end < d.date) return ($('#formErr').textContent = 'End date can’t be before the start date.');
-  if (!d.end || d.end === d.date) d.end = '';
-  if (editingId) { Object.assign(byId(editingId), d); if (!d.end) delete byId(editingId).end; addLog(`Edited “${d.title}”`); toast('Changes saved'); }
-  else { const a = { id: nextId(), signups: 0, created: Date.now(), ...d }; if (!a.end) delete a.end; items.push(a); addLog(`${d.status === 'draft' ? 'Drafted' : 'Published'} “${d.title}”`); toast(d.status === 'draft' ? 'Saved as draft' : 'Published to students'); }
-  save(); $('#editDlg').close(); render();
-});
-
-/* ---------- user editor ---------- */
-function openUser(u) {
-  editingUser = u ? u.id : null;
-  const f = $('#uform'); f.reset(); $('#uErr').textContent = '';
-  $('#uTitle').textContent = u ? 'Edit user' : 'Add user';
-  if (u) { f.elements.name.value = u.name; f.elements.email.value = u.email; f.elements.role.value = u.role; }
-  $('#userDlg').showModal(); f.elements.name.focus();
-}
-$('#uform').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const f = e.target.elements, name = f.name.value.trim(), email = f.email.value.trim().toLowerCase(), role = f.role.value;
-  if (!name) return ($('#uErr').textContent = 'Please enter a name.');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return ($('#uErr').textContent = 'Please enter a valid email.');
-  if (users.some((u) => u.email === email && u.id !== editingUser)) return ($('#uErr').textContent = 'That email is already in use.');
-  if (editingUser) { Object.assign(users.find((u) => u.id === editingUser), { name, email, role }); addLog(`Updated user ${name}`); }
-  else { users.push({ id: Math.max(0, ...users.map((u) => u.id)) + 1, name, email, role, active: true }); addLog(`Added user ${name} (${role})`); }
-  save(); $('#userDlg').close(); render(); toast('User saved');
+  if (d.end === d.date) d.end = '';
+  const btn = $('#formSubmit'); btn.disabled = true;
+  try {
+    await api.saveAnnouncement(editingId ? { id: editingId, ...d } : d);
+    api.log(editingId ? `Edited “${d.title}”` : `${d.status === 'draft' ? 'Drafted' : 'Published'} “${d.title}”`);
+    $('#editDlg').close();
+    toast(editingId ? 'Changes saved' : d.status === 'draft' ? 'Saved as draft' : 'Published to students');
+    await refresh();
+  } catch (err) { $('#formErr').textContent = 'Couldn’t save: ' + err.message; }
+  finally { btn.disabled = false; }
 });
 
 /* ---------- CSV export ---------- */
 function exportCsv() {
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const rows = [['Title', 'Type', 'Status', 'Start', 'End', 'Location', 'Audience', 'Pinned', 'Sign-ups', 'Details']]
-    .concat(tableItems().map((a) => [a.title, TYPE[a.type], STATUS[statusOf(a)], a.date, a.end || '', a.where, a.audience, a.pinned ? 'Yes' : 'No', a.type === 'exam' ? '' : signups(a), a.body]));
+    .concat(tableItems().map((a) => [a.title, TYPE[a.type], STATUS[statusOf(a)], a.date, a.end || '', a.where, a.audience, a.pinned ? 'Yes' : 'No', signups(a), a.body]));
   const url = URL.createObjectURL(new Blob([rows.map((r) => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv' }));
   const link = Object.assign(document.createElement('a'), { href: url, download: 'cici-announcements.csv' });
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -591,7 +576,7 @@ function exportCsv() {
 }
 
 /* ---------- events ---------- */
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   const t = e.target;
   if (t.closest('[data-close]')) return t.closest('dialog').close();
   const g = t.closest('[data-go]'); if (g) return go(g.dataset.go);
@@ -610,50 +595,85 @@ document.addEventListener('click', (e) => {
   switch (b.dataset.act) {
     case 'new': return openEditor(null);
     case 'edit': return openEditor(a);
-    case 'pin': a.pinned = !a.pinned; addLog(`${a.pinned ? 'Pinned' : 'Unpinned'} “${a.title}”`); save(); render(); return toast(a.pinned ? 'Pinned' : 'Unpinned');
-    case 'toggle': a.status = a.status === 'draft' ? 'published' : 'draft'; addLog(`${a.status === 'draft' ? 'Unpublished' : 'Published'} “${a.title}”`); save(); render(); return toast(a.status === 'draft' ? 'Moved to draft — hidden from students' : 'Published to students');
-    case 'dup': { const c = { ...clone(a), id: nextId(), title: a.title + ' (copy)', status: 'draft', signups: 0, pinned: false, created: Date.now() }; items.push(c); addLog(`Duplicated “${a.title}”`); save(); render(); return toast('Duplicated as draft'); }
-    case 'del': if (!confirm(`Delete “${a.title}”? Students will no longer see it.`)) return; items = items.filter((x) => x !== a); selected.delete(a.id); addLog(`Deleted “${a.title}”`); save(); render(); return toast('Deleted');
-    case 'delCurrent': { const c = byId(editingId); if (!c || !confirm(`Delete “${c.title}”?`)) return; items = items.filter((x) => x !== c); addLog(`Deleted “${c.title}”`); save(); $('#editDlg').close(); render(); return toast('Deleted'); }
-    case 'bulkPublish': case 'bulkDraft': {
-      const s = b.dataset.act === 'bulkPublish' ? 'published' : 'draft';
-      items.forEach((x) => selected.has(x.id) && (x.status = s)); addLog(`${s === 'draft' ? 'Unpublished' : 'Published'} ${selected.size} announcements`);
-      toast(`${selected.size} updated`); selected.clear(); save(); return render();
+    case 'pin': return run(async () => { await api.updateAnnouncements([a.id], { pinned: !a.pinned }); api.log(`${a.pinned ? 'Unpinned' : 'Pinned'} “${a.title}”`); }, a.pinned ? 'Unpinned' : 'Pinned');
+    case 'toggle': {
+      const next = a.status === 'draft' ? 'published' : 'draft';
+      return run(async () => { await api.updateAnnouncements([a.id], { status: next }); api.log(`${next === 'draft' ? 'Unpublished' : 'Published'} “${a.title}”`); },
+        next === 'draft' ? 'Moved to draft — hidden from students' : 'Published to students');
     }
-    case 'bulkDelete':
-      if (!confirm(`Delete ${selected.size} announcements?`)) return;
-      addLog(`Deleted ${selected.size} announcements`); items = items.filter((x) => !selected.has(x.id)); toast(`${selected.size} deleted`); selected.clear(); save(); return render();
+    case 'dup': {
+      const { id, created, signups: _s, ...rest } = a;
+      return run(async () => { await api.saveAnnouncement({ ...rest, title: (a.title + ' (copy)').slice(0, 80), status: 'draft', pinned: false }); api.log(`Duplicated “${a.title}”`); }, 'Duplicated as draft');
+    }
+    case 'del':
+      if (!confirm(`Delete “${a.title}”? Students will no longer see it.`)) return;
+      selected.delete(a.id);
+      return run(async () => { await api.deleteAnnouncements([a.id]); api.log(`Deleted “${a.title}”`); }, 'Deleted');
+    case 'delCurrent': {
+      const c = byId(editingId); if (!c || !confirm(`Delete “${c.title}”?`)) return;
+      $('#editDlg').close();
+      return run(async () => { await api.deleteAnnouncements([c.id]); api.log(`Deleted “${c.title}”`); }, 'Deleted');
+    }
+    case 'bulkPublish': case 'bulkDraft': {
+      const s = b.dataset.act === 'bulkPublish' ? 'published' : 'draft', ids = [...selected];
+      selected.clear();
+      return run(async () => { await api.updateAnnouncements(ids, { status: s }); api.log(`${s === 'draft' ? 'Unpublished' : 'Published'} ${ids.length} announcements`); }, `${ids.length} updated`);
+    }
+    case 'bulkDelete': {
+      const ids = [...selected];
+      if (!confirm(`Delete ${ids.length} announcements?`)) return;
+      selected.clear();
+      return run(async () => { await api.deleteAnnouncements(ids); api.log(`Deleted ${ids.length} announcements`); }, `${ids.length} deleted`);
+    }
     case 'bulkClear': selected.clear(); return renderTable();
     case 'export': return exportCsv();
     case 'prev': if (--calM < 0) { calM = 11; calY--; } return renderCal();
     case 'next': if (++calM > 11) { calM = 0; calY++; } return renderCal();
     case 'thisMonth': calY = now.getFullYear(); calM = now.getMonth(); return renderCal();
-    case 'invite': return openUser(null);
-    case 'uedit': return openUser(u);
-    case 'uactive': u.active = !u.active; addLog(`${u.active ? 'Reactivated' : 'Suspended'} ${u.name}`); save(); render(); return toast(u.active ? 'User reactivated' : 'User suspended');
-    case 'udel': if (!confirm(`Remove ${u.name}?`)) return; users = users.filter((x) => x !== u); addLog(`Removed user ${u.name}`); save(); render(); return toast('User removed');
-    case 'clearLog': log = []; save(); return render();
+    case 'uactive':
+      if (u.active && !confirm(`Suspend ${u.name}? They won’t be able to sign in or see announcements.`)) return;
+      return run(async () => { await api.updateProfile(u.id, { active: !u.active }); api.log(`${u.active ? 'Suspended' : 'Reactivated'} ${u.name}`); }, u.active ? 'User suspended' : 'User reactivated');
+    case 'clearLog':
+      if (!isAdmin(me)) return toast('Only admins can clear the log');
+      return run(() => api.clearLog(), 'Log cleared');
     case 'student': return window.open('index.html', '_blank', 'noopener');
+    case 'signout': await api.signOut(); return location.replace('login.html?msg=signedout');
     case 'reset':
       if (!confirm('Reset all announcements, users and the activity log to the demo data?')) return;
-      items = clone(SEED); users = clone(SEED_USERS); log = []; save(); render(); return toast('Demo data restored');
+      api.resetDemo(); return run(async () => {}, 'Demo data restored');
   }
 });
-document.addEventListener('change', (e) => {
+document.addEventListener('change', async (e) => {
   const t = e.target;
   if (t.dataset.sel) { const id = +t.dataset.sel; t.checked ? selected.add(id) : selected.delete(id); return renderTable(); }
   if (t.id === 'selAll') { tableItems().forEach((a) => (t.checked ? selected.add(a.id) : selected.delete(a.id))); return renderTable(); }
-  if (t.dataset.role) { const u = users.find((x) => x.id == t.dataset.role); u.role = t.value; addLog(`Changed ${u.name} to ${u.role}`); save(); return toast(`${u.name} is now ${u.role}`); }
-  if (t.id === 'sAud') { cfg.audience = t.value; save(); return toast('Default audience saved'); }
-  if (t.id === 'sDraft') { cfg.draftFirst = t.checked; save(); return toast('Saved'); }
-  if (t.id === 'sOrg') { cfg.org = t.value.trim() || 'CICI'; save(); render(); return toast('Organization name saved'); }
+  if (t.dataset.role) {
+    const u = users.find((x) => x.id == t.dataset.role), role = t.value;
+    return run(async () => { await api.updateProfile(u.id, { role }); api.log(`Changed ${u.name} to ${roleLabel(role)}`); }, `${u.name} is now ${roleLabel(role)}`);
+  }
+  if (t.id === 'sAud') { cfg.audience = t.value; saveCfg(); return toast('Default audience saved'); }
+  if (t.id === 'sDraft') { cfg.draftFirst = t.checked; saveCfg(); return toast('Saved'); }
+  if (t.id === 'sOrg') { cfg.org = t.value.trim() || 'CICI'; saveCfg(); render(); return toast('Organization name saved'); }
   if (['fType', 'fStatus', 'fSort', 'uRole'].includes(t.id)) render();
 });
 ['q', 'uq'].forEach((id) => $('#' + id).addEventListener('input', render));
 document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
-window.addEventListener('storage', () => { items = store.get('items', items); render(); });
-window.addEventListener('hashchange', () => go(location.hash.slice(1)));
-go(location.hash.slice(1));
+
+let reloadTimer;
+api.onAnnouncementsChange(() => { clearTimeout(reloadTimer); reloadTimer = setTimeout(refresh, 300); });
+
+/* ---------- deep links: #new, #edit-ID, #ann, #cal … ---------- */
+function fromHash() {
+  const h = location.hash.slice(1);
+  const ed = h.match(/^edit-(\d+)$/);
+  document.querySelectorAll('dialog[open]').forEach((d) => d.close());
+  if (h === 'new') { go('ann'); return openEditor(null); }
+  if (ed) { go('ann'); const a = byId(ed[1]); return a ? openEditor(a) : toast('Announcement not found'); }
+  go(h);
+}
+window.addEventListener('hashchange', fromHash);
+await refresh();
+fromHash();
 </script>
 </body>
 </html>

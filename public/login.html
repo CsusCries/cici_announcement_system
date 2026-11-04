@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · CICI</title>
+<style>
+:root{--blue:#1d4ed8;--blue-d:#1e3a8a;--blue-600:#2563eb;--blue-100:#e0eaff;--blue-50:#f2f6ff;--text:#0f1c3f;--muted:#5b6b84;--border:#e2e8f0;--red:#c81e1e;--green:#0f6b55}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--blue-50);color:var(--text);min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.brand{background:linear-gradient(140deg,#1e4fd0,#2f6df0 60%,#5b8ff5);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.brand .logo{display:flex;align-items:center;gap:12px}
+.brand .mark{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle,var(--blue) 0 22%,#fff 23% 100%)}
+.brand b{font-size:30px;letter-spacing:.5px}
+.brand h1{font-size:44px;line-height:1.1;margin:0 0 12px;max-width:460px}
+.brand p{font-size:18px;opacity:.92;max-width:420px;margin:0}
+.brand small{opacity:.8}
+.brand::after{content:"";position:absolute;right:-120px;bottom:-120px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.08)}
+.side{display:grid;place-items:center;padding:32px 20px}
+.card{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:0 12px 40px rgba(15,28,63,.08)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--blue-50);border-radius:12px;padding:4px;margin-bottom:20px}
+.tabs button{border:0;background:none;padding:10px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--blue-d);box-shadow:0 1px 3px rgba(15,28,63,.12)}
+h2{margin:0 0 4px;font-size:22px}
+.sub{color:var(--muted);margin:0 0 8px}
+label{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted);margin-top:14px}
+input{font:inherit;font-size:16px;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 12px;width:100%}
+input:focus{outline:2px solid var(--blue-600);outline-offset:1px;border-color:transparent}
+.btn{width:100%;margin-top:20px;border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:700;padding:12px;border-radius:10px;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:wait}
+.link{background:none;border:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;padding:0}
+.row{display:flex;justify-content:flex-end;margin-top:10px}
+.msg{border-radius:10px;padding:10px 12px;font-size:14px;margin-top:14px}
+.msg[hidden]{display:none}
+.msg.err{background:#fdecec;color:var(--red)}
+.msg.ok{background:#e7f6ee;color:var(--green)}
+.msg.info{background:var(--blue-100);color:var(--blue-d)}
+form[hidden]{display:none}
+@media (max-width:860px){
+  body{grid-template-columns:minmax(0,1fr);align-content:start}
+  .brand{padding:28px 20px;gap:18px}
+  .brand h1{font-size:28px}.brand p{font-size:15px}.brand small{display:none}
+  .brand::after{display:none}
+}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<section class="brand">
+  <div class="logo"><div class="mark"></div><b>CICI</b></div>
+  <div>
+    <h1>Connect. Learn. Participate.</h1>
+    <p>Sign in to see events, activities and exam schedules, and keep track of what you've joined.</p>
+  </div>
+  <small>CICI Announcement System</small>
+</section>
+
+<main class="side">
+  <div class="card">
+    <div class="tabs" id="tabs" role="tablist">
+      <button class="on" data-tab="in" role="tab">Sign in</button>
+      <button data-tab="up" role="tab">Create account</button>
+    </div>
+
+    <form id="fIn" novalidate>
+      <h2>Welcome back</h2>
+      <p class="sub">Use your school email.</p>
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <div class="row"><button type="button" class="link" data-tab="reset">Forgot password?</button></div>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+
+    <form id="fUp" novalidate hidden>
+      <h2>Create your account</h2>
+      <p class="sub">New accounts start as students. An admin can change your role.</p>
+      <label>Full name<input name="name" autocomplete="name" maxlength="60" required></label>
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn" type="submit">Create account</button>
+    </form>
+
+    <form id="fReset" novalidate hidden>
+      <h2>Reset password</h2>
+      <p class="sub">We'll email you a link to choose a new password.</p>
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <button class="btn" type="submit">Send reset link</button>
+      <div class="row"><button type="button" class="link" data-tab="in">Back to sign in</button></div>
+    </form>
+
+    <form id="fNew" novalidate hidden>
+      <h2>Choose a new password</h2>
+      <label>New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn" type="submit">Save password</button>
+    </form>
+
+    <div class="msg" id="msg" role="alert" hidden></div>
+  </div>
+</main>
+
+<script type="module">
+import { api, isStaff } from './js/data.js';
+
+const $ = (s) => document.querySelector(s);
+const forms = { in: '#fIn', up: '#fUp', reset: '#fReset', new: '#fNew' };
+const params = new URLSearchParams(location.search);
+const nextPage = /^[\w-]+\.html(#[\w-]*)?$/.test(params.get('next') || '') ? params.get('next') : null;
+
+function show(tab) {
+  Object.entries(forms).forEach(([k, sel]) => ($(sel).hidden = k !== tab));
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#tabs').hidden = tab === 'new';
+  msg('');
+}
+function msg(text, kind = 'err') { const m = $('#msg'); m.hidden = !text; m.textContent = text; m.className = 'msg ' + kind; }
+async function busy(form, fn) {
+  const b = form.querySelector('[type=submit]'); b.disabled = true;
+  try { await fn(); } catch (e) { msg(e.message); } finally { b.disabled = false; }
+}
+async function goIn() {
+  const me = await api.currentUser();
+  location.replace(nextPage || (isStaff(me) ? 'admin.html' : 'index.html'));
+}
+const emailOk = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+document.addEventListener('click', (e) => { const t = e.target.closest('[data-tab]'); if (t) show(t.dataset.tab); });
+
+$('#fIn').addEventListener('submit', (e) => {
+  e.preventDefault(); const f = e.target.elements;
+  const email = f.email.value.trim(), password = f.password.value;
+  if (!emailOk(email)) return msg('Please enter a valid email.');
+  if (api.live && !password) return msg('Please enter your password.');
+  busy(e.target, async () => { await api.signIn(email, password); await goIn(); });
+});
+
+$('#fUp').addEventListener('submit', (e) => {
+  e.preventDefault(); const f = e.target.elements;
+  const name = f.name.value.trim(), email = f.email.value.trim(), password = f.password.value;
+  if (!name) return msg('Please enter your name.');
+  if (!emailOk(email)) return msg('Please enter a valid email.');
+  if (password.length < 8) return msg('Password must be at least 8 characters.');
+  busy(e.target, async () => {
+    const { needsConfirm } = await api.signUp(name, email, password);
+    if (needsConfirm) { show('in'); msg('Account created. Check your email to confirm it, then sign in.', 'ok'); }
+    else await goIn();
+  });
+});
+
+$('#fReset').addEventListener('submit', (e) => {
+  e.preventDefault(); const email = e.target.elements.email.value.trim();
+  if (!emailOk(email)) return msg('Please enter a valid email.');
+  busy(e.target, async () => { await api.resetPassword(email); msg('If that email has an account, a reset link is on its way.', 'ok'); });
+});
+
+$('#fNew').addEventListener('submit', (e) => {
+  e.preventDefault(); const pw = e.target.elements.password.value;
+  if (pw.length < 8) return msg('Password must be at least 8 characters.');
+  busy(e.target, async () => { await api.updatePassword(pw); msg('Password updated. Signing you in…', 'ok'); setTimeout(goIn, 800); });
+});
+
+api.onRecovery(() => show('new'));
+
+if (params.get('msg') === 'suspended') msg('Your account is suspended. Contact an administrator.');
+else if (params.get('msg') === 'signedout') msg('You have been signed out.', 'info');
+if (!api.live) msg('Demo mode: Supabase isn’t connected yet, so no password is checked. Sign in as admin@cici.edu (admin) or paul.abian@student.cici.edu (student), or create an account.', 'info');
+
+// Already signed in (and not resetting a password)? Go straight in.
+if (!location.hash.includes('type=recovery')) {
+  try { const me = await api.currentUser(); if (me && me.active) location.replace(nextPage || (isStaff(me) ? 'admin.html' : 'index.html')); } catch {}
+}
+</script>
+</body>
+</html>

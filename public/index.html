@@ -7,6 +7,7 @@
 <style>
 :root{--blue:#1d4ed8;--blue-d:#1e3a8a;--blue-600:#2563eb;--blue-100:#e0eaff;--blue-50:#f2f6ff;--white:#fff;--text:#0f1c3f;--muted:#64748b;--border:#e2e8f0;--red:#dc2626}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--blue-50);color:var(--text)}
 button{font:inherit;cursor:pointer;color:inherit}
 a{color:inherit;text-decoration:none}
@@ -213,6 +214,7 @@ dialog .acts .sp{flex:1}
 @media (max-width:1100px){.avbtn{display:grid;place-items:center}}
 @media (max-width:560px){.newbtn{padding:10px 12px}.newbtn .lbl{display:none}.row2{grid-template-columns:1fr}.secR .sort{max-width:120px}}
 </style>
+<script src="config.js"></script>
 </head>
 <body>
 <div class="app" id="app">
@@ -225,27 +227,27 @@ dialog .acts .sp{flex:1}
       <button data-view="exam"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg>Exams</button>
       <hr>
       <button data-act="notif"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>Notifications <span class="badge" id="navBadge"></span></button>
-      <button data-act="settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+      <button data-act="settings"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</button>
     </nav>
     <div class="user">
-      <button data-act="profile"><div class="avatar">PA</div><div><b>Paul Abian</b><small>Student ▾</small></div></button>
+      <button data-act="profile"><div class="avatar" id="meInit"></div><div><b id="meName"></b><small><span id="meRole"></span> ▾</small></div></button>
     </div>
   </aside>
 
   <main class="main">
     <div class="toprow" style="position:relative">
       <label class="search"><span aria-hidden="true">🔍</span><input id="search" type="search" placeholder="Search announcements, events...  ( / )" aria-label="Search"></label>
-      <button class="btn primary newbtn" data-act="new" aria-label="New announcement">+ <span class="lbl">New</span></button>
+      <a class="btn primary newbtn" id="newBtn" href="admin.html#new" hidden aria-label="New announcement">+ <span class="lbl">New</span></a>
       <button class="bell" data-act="notif" aria-label="Notifications">🔔<span class="badge" id="bellBadge"></span></button>
-      <button class="avbtn" data-act="profile" aria-label="Profile">PA</button>
+      <button class="avbtn" data-act="profile" aria-label="Profile" id="meInit2"></button>
       <div class="dropdown" id="notifMenu" hidden></div>
     </div>
 
     <section class="hero" id="hero">
-      <span class="chip" id="heroChip"></span>
-      <h2 id="heroTitle"></h2>
-      <p id="heroText"></p>
-      <button class="cta" id="heroCta"></button>
+      <span class="chip" id="heroChip">📢 Latest Announcement</span>
+      <h2 id="heroTitle">Welcome to CICI!</h2>
+      <p id="heroText">Stay updated with the latest events, activities, and exams.</p>
+      <button class="cta" id="heroCta" data-view="all">View All Announcements →</button>
       <div class="bldg"></div>
       <div class="mega"></div>
       <div class="dots" id="heroDots"></div>
@@ -276,11 +278,11 @@ dialog .acts .sp{flex:1}
       <button data-view="mine">✓ My list</button>
     </div>
     <div class="filters" id="filters" hidden></div>
-    <section class="cards" id="cards"></section>
+    <section class="cards" id="cards"><div class="empty">Loading announcements…</div></section>
 
     <footer>
       <span><b>CICI</b> &nbsp;•&nbsp; Connect. Learn. Participate.</span>
-      <span>Stay informed. Stay ahead. ♡</span>
+      <span id="modeNote">Stay informed. Stay ahead. ♡</span>
     </footer>
   </main>
 
@@ -300,34 +302,12 @@ dialog .acts .sp{flex:1}
 <div class="dropdown" id="profileMenu" hidden>
   <button class="ni" data-view="mine"><b>✓ My list</b><small>Events and activities you joined</small></button>
   <button class="ni" data-view="saved"><b>★ Saved</b><small>Announcements you bookmarked</small></button>
-  <button class="ni" data-act="settings"><b>⚙ Settings</b><small>Display and data</small></button>
-  <a class="ni" href="admin.html" style="color:inherit"><b>🛠 Admin panel</b><small>Manage announcements and users</small></a>
-  <button class="ni" data-act="signout"><b>Sign out</b><small>Signed in as Paul Abian · Student</small></button>
+  <a class="ni" href="admin.html" id="adminLink" hidden style="color:inherit"><b>🛠 Admin panel</b><small>Manage announcements and users</small></a>
+  <button class="ni" data-act="settings"><b>⚙ Settings</b><small>Display preferences</small></button>
+  <button class="ni" data-act="signout"><b>Sign out</b><small id="meEmail"></small></button>
 </div>
 
 <dialog id="detail"><div class="box" id="detailBody"></div></dialog>
-
-<dialog id="formDlg">
-  <form class="box" id="form" novalidate>
-    <h3 id="formTitle">New announcement</h3>
-    <label class="fld">Title<input name="title" maxlength="80" required></label>
-    <div class="row2">
-      <label class="fld">Type<select name="type"><option value="event">Event</option><option value="activity">Activity</option><option value="exam">Exam</option></select></label>
-      <label class="fld">Location<input name="where" maxlength="60" placeholder="e.g. Room 105 or Online"></label>
-    </div>
-    <div class="row2">
-      <label class="fld">Start date<input name="date" type="date" required></label>
-      <label class="fld">End date (optional)<input name="end" type="date"></label>
-    </div>
-    <label class="fld">Details<textarea name="body" rows="3" maxlength="300"></textarea></label>
-    <label class="chk"><input type="checkbox" name="pinned"> Pin to top</label>
-    <div class="err" id="formErr" role="alert"></div>
-    <div class="acts">
-      <button type="button" class="btn" data-close>Cancel</button>
-      <button type="submit" class="btn primary" id="formSubmit">Publish</button>
-    </div>
-  </form>
-</dialog>
 
 <dialog id="settingsDlg">
   <div class="box">
@@ -335,14 +315,19 @@ dialog .acts .sp{flex:1}
     <label class="setrow"><span>Show welcome banner<small>The rotating banner at the top</small></span><input type="checkbox" id="setHero"></label>
     <label class="setrow"><span>Compact cards<small>Hide card images</small></span><input type="checkbox" id="setCompact"></label>
     <label class="setrow"><span>Auto-rotate banner<small>Change slide every 6 seconds</small></span><input type="checkbox" id="setRotate"></label>
-    <div class="setrow"><span>Reset demo data<small>Removes your posts, saved items and sign-ups</small></span><button class="btn danger" data-act="reset">Reset</button></div>
+    <div class="setrow"><span>Reset preferences<small>Display settings and read notifications on this device</small></span><button class="btn danger" data-act="reset">Reset</button></div>
     <div class="acts"><button class="btn primary" data-close>Done</button></div>
   </div>
 </dialog>
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script>
+<script type="module">
+import { api, isStaff, roleLabel, initials } from './js/data.js';
+
+/* ---------- sign-in gate ---------- */
+const me = await api.requireUser();
+
 /* ---------- constants ---------- */
 const TYPE = { event: 'Events', activity: 'Activities', exam: 'Exams', saved: 'Saved', mine: 'My list' };
 const PILL = { event: 'Event', activity: 'Activity', exam: 'Exam' };
@@ -350,51 +335,45 @@ const TAG = { event: '', activity: 'act', exam: 'exam' };
 const IMG = { event: '', activity: 'green', exam: 'paper' };
 const ACTION = { event: ['Register', 'Registered ✓'], activity: ['Join', 'Joined ✓'], exam: ['Remind me', 'Reminder set ✓'] };
 const HASH = { all: '', event: 'events', activity: 'activities', exam: 'exams', saved: 'saved', mine: 'mine' };
-
-const SEED = [
-  { id: 1, type: 'event', title: 'CICI Week 2026', date: '2026-11-15', end: '2026-11-21', where: 'Main Campus', pinned: true, body: 'A week of fun, learning, and community!' },
-  { id: 2, type: 'activity', title: 'Green Campus Initiative', date: '2026-11-10', end: '2026-11-30', where: 'Campus Grounds', body: 'Join our tree planting activity.' },
-  { id: 3, type: 'exam', title: 'Midterm Examination', date: '2026-11-20', where: 'Online', body: 'Coverage: Modules 1–5.' },
-  { id: 4, type: 'activity', title: 'Activity Deadline', date: '2026-11-30', where: 'Student Affairs Office', body: 'Last day to submit your activity sign-up form.' },
-  { id: 5, type: 'event', title: 'Freshmen Orientation', date: '2026-11-09', where: 'Auditorium', body: 'Welcome session, campus tour and club sign-ups.' },
-  { id: 6, type: 'exam', title: 'Data Structures Quiz', date: '2026-11-12', where: 'Room 105', body: 'Chapters 4–6. Bring your student ID.' },
-];
-
 const SLIDES = [
   { chip: '📢 Latest Announcement', title: 'Welcome to CICI!', text: 'Stay updated with the latest events, activities, and exams.', cta: 'View All Announcements →', view: 'all' },
-  { chip: '📅 Event', title: 'CICI Week is Coming', text: 'A week of fun, learning, and community starts November 15.', cta: 'See Events →', view: 'event' },
-  { chip: '📄 Exam', title: 'Midterms Are Near', text: 'Check the exam schedule and prepare early.', cta: 'View Exams →', view: 'exam' },
+  { chip: '📅 Event', title: 'Don’t Miss Out', text: 'Browse upcoming events and register in one tap.', cta: 'See Events →', view: 'event' },
+  { chip: '📄 Exam', title: 'Stay Exam-Ready', text: 'Check the exam schedule and set reminders.', cta: 'View Exams →', view: 'exam' },
 ];
 
-/* ---------- storage (safe if blocked) ---------- */
-const store = {
+/* ---------- per-device preferences ---------- */
+const pref = {
   get(k, d) { try { const v = localStorage.getItem('cici.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem('cici.' + k, JSON.stringify(v)); } catch {} },
 };
-let custom = store.get('custom', []);
-let reg = new Set(store.get('reg', []));
-let saved = new Set(store.get('saved', []));
-let read = new Set(store.get('read', []));
-let settings = Object.assign({ hero: true, compact: false, rotate: true }, store.get('settings', {}));
-const persist = () => {
-  store.set('custom', custom); store.set('reg', [...reg]); store.set('saved', [...saved]);
-  store.set('read', [...read]); store.set('settings', settings);
-};
-// Admin-managed items (admin.html writes cici.items); drafts are hidden from students.
-const adminItems = () => (store.get('items', null) || SEED).filter((a) => a.status !== 'draft');
-const all = () => [...adminItems(), ...custom];
-const byId = (id) => all().find((a) => a.id == id);
+let read = new Set(pref.get('read.' + me.id, []));
+let settings = Object.assign({ hero: true, compact: false, rotate: true }, pref.get('settings', {}));
+const persistPrefs = () => { pref.set('read.' + me.id, [...read]); pref.set('settings', settings); };
+
+/* ---------- server data ---------- */
+let items = [], reg = new Set(), saved = new Set();
+async function load() {
+  try {
+    [items, reg, saved] = await Promise.all([api.listAnnouncements(), api.mySignups(), api.mySaves()]);
+    items = items.filter((a) => a.status !== 'draft'); // staff see drafts only in the admin panel
+  } catch (e) {
+    $('#cards').innerHTML = `<div class="empty">Couldn’t load announcements: ${esc(e.message)}</div>`;
+    throw e;
+  }
+}
+const all = () => items;
+const byId = (id) => items.find((a) => a.id == id);
 
 /* ---------- state ---------- */
 const now = new Date();
 const TODAY = iso(now.getFullYear(), now.getMonth(), now.getDate());
-let view = 'all', query = '', sort = 'soon', selectedDay = null, heroIndex = 0, editingId = null;
+let view = 'all', query = '', sort = 'soon', selectedDay = null, heroIndex = 0;
 let calYear = now.getFullYear(), calMonth = now.getMonth();
 
 /* ---------- helpers ---------- */
-const $ = (s) => document.querySelector(s);
+function $(s) { return document.querySelector(s); }
 function iso(y, m, d) { return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 const D = (s) => new Date(s + 'T00:00:00');
 const fmt = (s, o) => D(s).toLocaleDateString(undefined, o);
 const fmtLong = (a) => a.end && a.end !== a.date ? `${fmt(a.date, { month: 'short', day: 'numeric' })} – ${fmt(a.end, { month: 'short', day: 'numeric', year: 'numeric' })}` : fmt(a.date, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -411,18 +390,21 @@ const when = (a) => {
   const n = daysUntil(a.date);
   return n < 0 ? 'Ended' : n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
 };
-
 let toastTimer;
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
-}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600); }
 function closeMenus() { $('#notifMenu').hidden = true; $('#profileMenu').hidden = true; }
 
-/* ---------- notifications: anything starting within 14 days, or that you posted ---------- */
+/* ---------- who's signed in ---------- */
+$('#meName').textContent = me.name;
+$('#meRole').textContent = roleLabel(me.role);
+$('#meInit').textContent = $('#meInit2').textContent = initials(me.name);
+$('#meEmail').textContent = me.email;
+$('#adminLink').hidden = $('#newBtn').hidden = !isStaff(me);
+if (!api.live) $('#modeNote').textContent = 'Demo mode · data stays in this browser';
+
+/* ---------- notifications: anything starting within 14 days or happening now ---------- */
 function notifications() {
-  return all().filter((a) => (daysUntil(a.date) >= 0 && daysUntil(a.date) <= 14) || covers(a, TODAY) || a.own)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  return all().filter((a) => (daysUntil(a.date) >= 0 && daysUntil(a.date) <= 14) || covers(a, TODAY)).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /* ---------- filtering ---------- */
@@ -434,7 +416,7 @@ function filtered() {
     .filter((a) => !selectedDay || covers(a, selectedDay));
   const cmp = {
     soon: (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.date.localeCompare(b.date),
-    new: (a, b) => b.id - a.id,
+    new: (a, b) => (b.created || b.id) - (a.created || a.id),
     az: (a, b) => a.title.localeCompare(b.title),
   }[sort];
   return list.sort(cmp);
@@ -447,33 +429,28 @@ function renderHero() {
   $('#heroText').textContent = s.text; $('#heroCta').textContent = s.cta; $('#heroCta').dataset.view = s.view;
   $('#heroDots').innerHTML = SLIDES.map((_, i) => `<button class="${i === heroIndex ? 'on' : ''}" data-dot="${i}" aria-label="Slide ${i + 1}"></button>`).join('');
 }
-
 function renderQuick() {
   const count = (t) => all().filter((a) => a.type === t && endOf(a) >= TODAY).length;
   $('#qEvent').textContent = `${count('event')} upcoming events`;
   $('#qActivity').textContent = `${count('activity')} open activities`;
   $('#qExam').textContent = `${count('exam')} scheduled exams`;
 }
-
-function actionBtn(a, cls = '') {
+function actionBtn(a) {
   const on = reg.has(a.id);
-  return `<button class="btn ${on ? 'done' : 'primary'} ${cls}" data-act="reg" data-id="${a.id}">${ACTION[a.type][on ? 1 : 0]}</button>`;
+  return `<button class="btn ${on ? 'done' : 'primary'}" data-act="reg" data-id="${a.id}">${ACTION[a.type][on ? 1 : 0]}</button>`;
 }
-
 function renderCards() {
   const list = filtered();
   $('#updatesTitle').textContent = view === 'all' ? 'Latest Updates' : TYPE[view];
   document.querySelectorAll('#chips button, #nav button[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
-
   const f = [];
   if (selectedDay) f.push(`<button class="fchip" data-act="clearDay">📅 ${fmt(selectedDay, { weekday: 'short', month: 'short', day: 'numeric' })} ✕</button>`);
   if (query.trim()) f.push(`<button class="fchip" data-act="clearSearch">🔍 “${esc(query.trim())}” ✕</button>`);
   $('#filters').innerHTML = f.length ? `<span class="mine">${list.length} result${list.length === 1 ? '' : 's'} ·</span>${f.join('')}<button class="linkbtn" data-act="clear">Clear all</button>` : '';
   $('#filters').hidden = !f.length;
-
   const emptyMsg = view === 'saved' ? 'Nothing saved yet. Tap ☆ on any announcement to save it.'
     : view === 'mine' ? 'You haven’t joined anything yet.'
-    : selectedDay ? 'Nothing scheduled on this day.' : 'No announcements match.';
+    : selectedDay ? 'Nothing scheduled on this day.' : items.length ? 'No announcements match.' : 'No announcements yet.';
   $('#cards').innerHTML = list.length ? list.map((a) => `
     <article class="card">
       <div class="top">
@@ -486,12 +463,11 @@ function renderCards() {
         <h4><button class="titlebtn" data-act="open" data-id="${a.id}">${esc(a.title)}</button></h4>
         <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}</div>
         <p>${esc(a.body)}</p>
-        <span class="mine">${when(a)}${a.own ? ' · Posted by you' : ''}</span>
+        <span class="mine">${when(a)}${a.audience && a.audience !== 'All students' ? ' · For ' + esc(a.audience) : ''}</span>
       </div>
       <div class="foot">${actionBtn(a)}<button class="linkbtn" data-act="open" data-id="${a.id}">Details →</button></div>
     </article>`).join('') : `<div class="empty">${emptyMsg}</div>`;
 }
-
 function renderCal() {
   $('#monthLabel').textContent = new Date(calYear, calMonth, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const first = new Date(calYear, calMonth, 1).getDay();
@@ -507,7 +483,6 @@ function renderCal() {
   }
   $('#cal').innerHTML = html;
 }
-
 function renderUpcoming() {
   const list = (selectedDay ? all().filter((a) => covers(a, selectedDay)) : all().filter((a) => endOf(a) >= TODAY))
     .sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
@@ -518,7 +493,6 @@ function renderUpcoming() {
       <span class="pill ${TAG[a.type]}">${PILL[a.type]}</span>
     </button>`).join('') : `<p class="none">${selectedDay ? 'Nothing on this day.' : 'Nothing upcoming.'}</p>`;
 }
-
 function renderNotif() {
   const list = notifications();
   const unread = list.filter((a) => !read.has(a.id)).length;
@@ -529,23 +503,22 @@ function renderNotif() {
     : '<p class="ni"><small>No notifications</small></p>')
     + (unread ? '<button class="ni" data-act="readAll" style="text-align:center;color:var(--blue);font-weight:600">Mark all as read</button>' : '');
 }
-
 function applySettings() {
   $('#app').classList.toggle('nohero', !settings.hero);
   $('#app').classList.toggle('compact', settings.compact);
   $('#setHero').checked = settings.hero; $('#setCompact').checked = settings.compact; $('#setRotate').checked = settings.rotate;
 }
-
 function renderAll() { applySettings(); renderHero(); renderQuick(); renderCards(); renderCal(); renderUpcoming(); renderNotif(); }
 
 /* ---------- detail dialog ---------- */
 function openDetail(id) {
-  const a = byId(id); if (!a) return;
-  read.add(a.id); persist(); renderNotif();
+  const a = byId(id);
+  if (!a) { if ($('#detail').open) $('#detail').close(); return toast('That announcement is no longer available'); }
+  read.add(a.id); persistPrefs(); renderNotif();
   $('#detailBody').innerHTML = `
     <span class="pill ${TAG[a.type]}">${PILL[a.type]}</span> <span class="mine">${when(a)}</span>
     <h3>${esc(a.title)}</h3>
-    <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}</div>
+    <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}<span>👥 ${esc(a.audience || 'All students')}</span></div>
     <p>${esc(a.body) || '<span class="mine">No details.</span>'}</p>
     <div class="acts">
       <button class="btn" data-act="ics" data-id="${a.id}">📆 Add to calendar</button>
@@ -553,7 +526,7 @@ function openDetail(id) {
       <button class="btn" data-act="save" data-id="${a.id}">${saved.has(a.id) ? '★ Saved' : '☆ Save'}</button>
     </div>
     <div class="acts">
-      ${a.own ? `<button class="btn danger" data-act="del" data-id="${a.id}">Delete</button><button class="btn" data-act="edit" data-id="${a.id}">Edit</button>` : ''}
+      ${isStaff(me) ? `<a class="btn" href="admin.html#edit-${a.id}">Edit in admin</a>` : ''}
       <span class="sp"></span>
       <button class="btn" data-close>Close</button>
       ${actionBtn(a)}
@@ -561,36 +534,6 @@ function openDetail(id) {
   if (!$('#detail').open) $('#detail').showModal();
   history.replaceState(null, '', '#item-' + a.id);
 }
-
-/* ---------- form ---------- */
-function openForm(a) {
-  editingId = a ? a.id : null;
-  const f = $('#form'); f.reset();
-  $('#formTitle').textContent = a ? 'Edit announcement' : 'New announcement';
-  $('#formSubmit').textContent = a ? 'Save changes' : 'Publish';
-  $('#formErr').textContent = '';
-  const src = a || { type: ['event', 'activity', 'exam'].includes(view) ? view : 'event', date: selectedDay || TODAY };
-  for (const k of ['title', 'type', 'where', 'date', 'end', 'body']) f.elements[k].value = src[k] || '';
-  f.elements.pinned.checked = !!src.pinned;
-  if ($('#detail').open) $('#detail').close();
-  $('#formDlg').showModal();
-  f.elements.title.focus();
-}
-
-$('#form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const f = e.target.elements;
-  const d = { title: f.title.value.trim(), type: f.type.value, where: f.where.value.trim(), date: f.date.value, end: f.end.value, body: f.body.value.trim(), pinned: f.pinned.checked };
-  if (!d.title) return ($('#formErr').textContent = 'Please add a title.');
-  if (!d.date) return ($('#formErr').textContent = 'Please choose a start date.');
-  if (d.end && d.end < d.date) return ($('#formErr').textContent = 'End date can’t be before the start date.');
-  if (!d.end || d.end === d.date) delete d.end;
-  if (editingId) custom = custom.map((a) => (a.id === editingId ? { ...a, ...d } : a));
-  else custom.push({ id: Date.now(), own: true, ...d });
-  persist(); $('#formDlg').close();
-  const [y, m] = d.date.split('-').map(Number); calYear = y; calMonth = m - 1;
-  renderAll(); toast(editingId ? 'Announcement updated' : 'Announcement published');
-});
 
 /* ---------- .ics download ---------- */
 function downloadIcs(a) {
@@ -606,11 +549,9 @@ function downloadIcs(a) {
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   toast('Calendar file downloaded');
 }
-
 async function copyLink(a) {
   const url = location.origin + location.pathname + '#item-' + a.id;
-  try { await navigator.clipboard.writeText(url); toast('Link copied'); }
-  catch { prompt('Copy this link:', url); }
+  try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { prompt('Copy this link:', url); }
 }
 
 /* ---------- navigation ---------- */
@@ -621,7 +562,6 @@ function setView(v, scroll = true) {
   renderAll();
   if (scroll) $('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
 function fromHash() {
   const h = location.hash.slice(1);
   const item = h.match(/^item-(\d+)$/);
@@ -629,7 +569,6 @@ function fromHash() {
   const v = Object.keys(HASH).find((k) => HASH[k] && HASH[k] === h);
   view = v || 'all'; renderAll();
 }
-
 function placeMenu(menu, btn) {
   menu.hidden = false;
   const r = btn.getBoundingClientRect(), mh = menu.offsetHeight, mw = menu.offsetWidth;
@@ -638,8 +577,21 @@ function placeMenu(menu, btn) {
   menu.style.left = Math.min(Math.max(8, r.left), innerWidth - mw - 8) + 'px';
 }
 
+/* Toggle a per-user flag optimistically, roll back if the server refuses. */
+async function toggleFlag(set, a, call, msgs) {
+  const on = !set.has(a.id);
+  on ? set.add(a.id) : set.delete(a.id);
+  renderCards(); if ($('#detail').open) openDetail(a.id);
+  try { await call(a.id, on); toast(on ? msgs[0] : msgs[1]); }
+  catch (e) {
+    on ? set.delete(a.id) : set.add(a.id);
+    renderCards(); if ($('#detail').open) openDetail(a.id);
+    toast('Couldn’t save: ' + e.message);
+  }
+}
+
 /* ---------- clicks ---------- */
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   const t = e.target;
   const v = t.closest('[data-view]');
   if (v) return setView(v.dataset.view);
@@ -653,44 +605,30 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (t.closest('[data-close]')) { t.closest('dialog').close(); return; }
-
   const btn = t.closest('[data-act]');
   if (!btn) { if (!t.closest('.dropdown')) closeMenus(); return; }
   const a = btn.dataset.id ? byId(btn.dataset.id) : null;
 
   switch (btn.dataset.act) {
     case 'open': closeMenus(); return openDetail(btn.dataset.id);
-    case 'reg': {
-      const on = !reg.has(a.id); on ? reg.add(a.id) : reg.delete(a.id); persist();
-      toast(on ? { event: `Registered for ${a.title}`, activity: `Joined ${a.title}`, exam: `Reminder set for ${a.title}` }[a.type]
-        : { event: 'Registration cancelled', activity: 'You left this activity', exam: 'Reminder removed' }[a.type]);
-      renderCards(); if ($('#detail').open) openDetail(a.id); return;
-    }
-    case 'save': {
-      const on = !saved.has(a.id); on ? saved.add(a.id) : saved.delete(a.id); persist();
-      toast(on ? 'Saved' : 'Removed from saved'); renderCards(); if ($('#detail').open) openDetail(a.id); return;
-    }
+    case 'reg': return toggleFlag(reg, a, (id, on) => api.toggleSignup(id, on),
+      { event: [`Registered for ${a.title}`, 'Registration cancelled'], activity: [`Joined ${a.title}`, 'You left this activity'], exam: [`Reminder set for ${a.title}`, 'Reminder removed'] }[a.type]);
+    case 'save': return toggleFlag(saved, a, (id, on) => api.toggleSave(id, on), ['Saved', 'Removed from saved']);
     case 'ics': return downloadIcs(a);
     case 'share': return copyLink(a);
-    case 'edit': return openForm(a);
-    case 'del':
-      if (!confirm(`Delete “${a.title}”?`)) return;
-      custom = custom.filter((x) => x.id !== a.id); reg.delete(a.id); saved.delete(a.id); persist();
-      $('#detail').close(); renderAll(); return toast('Announcement deleted');
-    case 'new': closeMenus(); return openForm();
     case 'notif': {
       const m = $('#notifMenu'); const show = m.hidden; closeMenus(); m.hidden = !show;
       if (show && btn.closest('.nav')) $('.toprow').scrollIntoView({ behavior: 'smooth' });
       return;
     }
-    case 'readAll': notifications().forEach((x) => read.add(x.id)); persist(); renderNotif(); return toast('All caught up');
+    case 'readAll': notifications().forEach((x) => read.add(x.id)); persistPrefs(); renderNotif(); return toast('All caught up');
     case 'profile': { const m = $('#profileMenu'); const show = m.hidden; closeMenus(); if (show) placeMenu(m, btn); return; }
     case 'settings': closeMenus(); applySettings(); return $('#settingsDlg').showModal();
-    case 'signout': closeMenus(); return toast('Sign-in isn’t set up yet — this is a demo');
+    case 'signout': closeMenus(); await api.signOut(); return location.replace('login.html?msg=signedout');
     case 'reset':
-      if (!confirm('Reset all your posts, saved items and sign-ups?')) return;
-      custom = []; reg = new Set(); saved = new Set(); read = new Set(); settings = { hero: true, compact: false, rotate: true };
-      persist(); $('#settingsDlg').close(); setView('all', false); return toast('Demo data reset');
+      if (!confirm('Reset display settings and notification read status on this device?')) return;
+      read = new Set(); settings = { hero: true, compact: false, rotate: true };
+      persistPrefs(); $('#settingsDlg').close(); setView('all', false); return toast('Preferences reset');
     case 'today':
       calYear = now.getFullYear(); calMonth = now.getMonth(); selectedDay = TODAY;
       renderCal(); renderUpcoming(); renderCards(); return;
@@ -705,9 +643,9 @@ document.addEventListener('click', (e) => {
 /* ---------- inputs ---------- */
 $('#search').addEventListener('input', (e) => { query = e.target.value; renderCards(); });
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; renderCards(); });
-$('#setHero').addEventListener('change', (e) => { settings.hero = e.target.checked; persist(); applySettings(); });
-$('#setCompact').addEventListener('change', (e) => { settings.compact = e.target.checked; persist(); applySettings(); });
-$('#setRotate').addEventListener('change', (e) => { settings.rotate = e.target.checked; persist(); });
+$('#setHero').addEventListener('change', (e) => { settings.hero = e.target.checked; persistPrefs(); applySettings(); });
+$('#setCompact').addEventListener('change', (e) => { settings.compact = e.target.checked; persistPrefs(); applySettings(); });
+$('#setRotate').addEventListener('change', (e) => { settings.rotate = e.target.checked; persistPrefs(); });
 document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
 $('#detail').addEventListener('close', () => { if (location.hash.startsWith('#item-')) history.replaceState(null, '', HASH[view] ? '#' + HASH[view] : location.pathname); });
 document.addEventListener('keydown', (e) => {
@@ -715,7 +653,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '/' && !e.target.closest('input, textarea, select') && !document.querySelector('dialog[open]')) { e.preventDefault(); $('#search').focus(); }
 });
 window.addEventListener('hashchange', fromHash);
-window.addEventListener('storage', (e) => { if (e.key === 'cici.items') renderAll(); });
 window.addEventListener('resize', closeMenus);
 
 let paused = false;
@@ -723,6 +660,14 @@ $('#hero').addEventListener('mouseenter', () => (paused = true));
 $('#hero').addEventListener('mouseleave', () => (paused = false));
 setInterval(() => { if (settings.rotate && settings.hero && !paused && !document.hidden) { heroIndex = (heroIndex + 1) % SLIDES.length; renderHero(); } }, 6000);
 
+/* ---------- live updates when staff change announcements ---------- */
+let reloadTimer;
+api.onAnnouncementsChange(() => {
+  clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(async () => { try { await load(); renderAll(); } catch {} }, 300);
+});
+
+await load();
 fromHash();
 </script>
 </body>
