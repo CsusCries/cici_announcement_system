@@ -18,6 +18,38 @@ if (live) {
   sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 }
 
+/* ---------------- images ---------------- */
+const BUCKET = 'announcement-images';
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+// Resize to fit maxSide and re-encode (WebP, or JPEG where WebP encoding isn't supported).
+async function shrinkImage(file, maxSide, quality) {
+  if (!file || !file.type.startsWith('image/')) throw new Error('Please choose an image file (JPG, PNG or WebP).');
+  if (file.size > 20 * 1024 * 1024) throw new Error('That image is over 20 MB. Please choose a smaller one.');
+  let src;
+  try { src = await createImageBitmap(file); }
+  catch {
+    src = await new Promise((resolve, reject) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('This image format isn’t supported by your browser. Try a JPG or PNG.')); };
+      img.src = url;
+    });
+  }
+  const w0 = src.width, h0 = src.height, k = Math.min(1, maxSide / Math.max(w0, h0));
+  const canvas = Object.assign(document.createElement('canvas'), { width: Math.round(w0 * k), height: Math.round(h0 * k) });
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // flatten transparency for JPEG
+  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+  if (src.close) src.close();
+  const toBlob = (type) => new Promise((r) => canvas.toBlob(r, type, quality));
+  let blob = await toBlob('image/webp');
+  if (!blob || blob.type !== 'image/webp') blob = await toBlob('image/jpeg');
+  if (!blob) throw new Error('Couldn’t process that image.');
+  return blob;
+}
+const blobToDataUrl = (blob) => new Promise((resolve, reject) => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.onerror = reject; fr.readAsDataURL(blob); });
+
 export const isStaff = (u) => !!u && (u.role === 'admin' || u.role === 'faculty');
 export const isAdmin = (u) => !!u && u.role === 'admin';
 export const roleLabel = (r) => ({ student: 'Student', faculty: 'Faculty', admin: 'Admin' }[r] || r);
@@ -30,12 +62,12 @@ const fail = (error) => { if (error) throw new Error(error.message || String(err
 const fromRow = (r) => ({
   id: r.id, type: r.type, title: r.title, date: r.date, end: r.end_date || undefined,
   where: r.location || '', body: r.body || '', audience: r.audience || 'All students',
-  pinned: !!r.pinned, status: r.status, created: Date.parse(r.created_at),
+  pinned: !!r.pinned, status: r.status, created: Date.parse(r.created_at), image: r.image_path || '',
 });
 const toRow = (a) => {
-  const map = { type: 'type', title: 'title', date: 'date', end: 'end_date', where: 'location', body: 'body', audience: 'audience', pinned: 'pinned', status: 'status' };
+  const map = { type: 'type', title: 'title', date: 'date', end: 'end_date', where: 'location', body: 'body', audience: 'audience', pinned: 'pinned', status: 'status', image: 'image_path' };
   const row = {};
-  for (const [k, col] of Object.entries(map)) if (k in a) row[col] = k === 'end' ? (a.end || null) : a[k];
+  for (const [k, col] of Object.entries(map)) if (k in a) row[col] = (k === 'end' || k === 'image') ? (a[k] || null) : a[k];
   return row;
 };
 const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role, active: p.active, year: p.year_level || '' });
@@ -193,6 +225,34 @@ export const api = {
     sb.channel('announcements-' + Math.random().toString(36).slice(2))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => cb())
       .subscribe();
+  },
+
+  /* ---- photos ---- */
+  // Returns a resized Blob ready to upload (call when the user picks a file, to show errors early).
+  prepareImage(file) { return live ? shrinkImage(file, 1600, 0.82) : shrinkImage(file, 900, 0.72); },
+
+  // Uploads a prepared image and returns the value to store in announcement.image.
+  async uploadImage(blob) {
+    if (!IMAGE_TYPES.includes(blob.type)) throw new Error('Unsupported image type.');
+    if (!live) return blobToDataUrl(blob); // demo: kept inline in localStorage
+    const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
+    const id = (crypto.randomUUID && crypto.randomUUID()) || Date.now().toString(36) + Math.random().toString(36).slice(2);
+    const path = `${new Date().getFullYear()}/${id}.${ext}`;
+    const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false });
+    fail(error);
+    return path;
+  },
+
+  // Best effort: removing an unused photo should never block the main action.
+  async deleteImage(path) {
+    if (!live || !path || path.startsWith('data:')) return;
+    try { await sb.storage.from(BUCKET).remove([path]); } catch {}
+  },
+
+  imageUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('data:') || path.startsWith('https://')) return path;
+    return live ? sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl : '';
   },
 
   /* ---- sign-ups and saved items (per user) ---- */

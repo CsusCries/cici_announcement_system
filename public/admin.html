@@ -133,6 +133,14 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
 .preview .lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
 .pcard{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .pcard .img{height:90px;margin:10px 10px 0;border-radius:10px;background:linear-gradient(135deg,#d7e6ff,#9dbcf3)}
+.pcard .img.has{background-size:cover;background-position:center;height:130px}
+.imgpick{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.imgpick .thumbbox{width:120px;height:72px;border-radius:10px;border:1px dashed var(--border);background:#f8faff center/cover no-repeat;display:grid;place-items:center;color:var(--muted);font-size:12px;font-weight:600;flex:none}
+.imgpick .thumbbox.has{border-style:solid;color:transparent}
+.imgpick .btns{display:flex;gap:8px;flex-wrap:wrap}
+.imgpick label.btn{cursor:pointer;display:inline-block;color:var(--text)}
+.imgpick input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+.thumb{width:44px;height:32px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:8px;background:var(--blue-50)}
 .pcard .img.activity{background:linear-gradient(135deg,#2f7d4f,#8cc48f)}
 .pcard .img.exam{background:linear-gradient(135deg,#eef2fb,#c8d3ea)}
 .pcard .b{padding:12px}
@@ -322,6 +330,15 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
           <label class="fld">Location<input name="where" maxlength="60" placeholder="Room 105, Online…"></label>
           <label class="fld">Audience<select name="audience"><option>All students</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Faculty</option></select></label>
         </div>
+        <div class="fld">Photo <span class="sub" style="font-weight:400">(optional, resized automatically)</span>
+          <div class="imgpick">
+            <div class="thumbbox" id="imgBox">No photo</div>
+            <div class="btns">
+              <label class="btn sm">Choose photo<input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp,image/gif"></label>
+              <button type="button" class="btn sm danger" id="imgRemove" hidden>Remove</button>
+            </div>
+          </div>
+        </div>
         <label class="fld">Details<textarea name="body" rows="4" maxlength="400"></textarea></label>
         <label class="chk"><input type="checkbox" name="pinned"> Pin to top of student feed</label>
       </div>
@@ -478,7 +495,7 @@ function renderTable() {
     const s = statusOf(a);
     return `<tr class="${selected.has(a.id) ? 'sel' : ''}">
       <td class="cb"><input type="checkbox" data-sel="${a.id}" ${selected.has(a.id) ? 'checked' : ''} aria-label="Select ${esc(a.title)}"></td>
-      <td data-l="Title"><button class="t" data-edit="${a.id}">${a.pinned ? '📌 ' : ''}${esc(a.title)}</button><span class="sub">${esc(a.where || '—')} · ${esc(a.audience || 'All students')}</span></td>
+      <td data-l="Title">${a.image ? `<img class="thumb" src="${esc(api.imageUrl(a.image))}" alt="" loading="lazy">` : ''}<button class="t" data-edit="${a.id}">${a.pinned ? '📌 ' : ''}${esc(a.title)}</button><span class="sub">${esc(a.where || '—')} · ${esc(a.audience || 'All students')}</span></td>
       <td data-l="Type"><span class="pill ${a.type}">${TYPE[a.type]}</span></td>
       <td data-l="Date">${range(a)}</td>
       <td data-l="Status"><span class="st ${s}">${STATUS[s]}</span></td>
@@ -533,6 +550,52 @@ function renderUsers() {
 function renderSettings() { $('#sOrg').value = cfg.org; $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
 
 /* ---------- editor ---------- */
+// Photo picked in the editor: keep the current one, replace it with a new blob, or remove it.
+let photo = { current: '', blob: null, removed: false, preview: '' };
+function setPhotoPreview() {
+  const url = photo.blob ? photo.preview : photo.removed ? '' : api.imageUrl(photo.current);
+  const box = $('#imgBox');
+  box.style.backgroundImage = url ? `url("${url}")` : '';
+  box.classList.toggle('has', !!url); box.textContent = url ? '' : 'No photo';
+  $('#imgRemove').hidden = !url;
+  $('#pImg').style.backgroundImage = url ? `url("${url}")` : '';
+  $('#pImg').classList.toggle('has', !!url);
+}
+function resetPhoto(current = '') {
+  if (photo.preview) URL.revokeObjectURL(photo.preview);
+  photo = { current, blob: null, removed: false, preview: '' };
+  $('#imgFile').value = '';
+  setPhotoPreview();
+}
+$('#imgFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  $('#formErr').textContent = 'Preparing photo…';
+  $('#formSubmit').disabled = true; // don't let Save run with the old photo while this one is processing
+  try {
+    const blob = await api.prepareImage(file);
+    if (photo.preview) URL.revokeObjectURL(photo.preview);
+    photo.blob = blob; photo.removed = false; photo.preview = URL.createObjectURL(blob);
+    $('#formErr').textContent = '';
+    setPhotoPreview();
+  } catch (err) { $('#formErr').textContent = err.message; e.target.value = ''; }
+  finally { $('#formSubmit').disabled = false; }
+});
+$('#imgRemove').addEventListener('click', () => {
+  if (photo.preview) URL.revokeObjectURL(photo.preview);
+  photo.blob = null; photo.preview = ''; photo.removed = true; $('#imgFile').value = '';
+  setPhotoPreview();
+});
+// Delete photos that no remaining announcement uses (duplicates can share one).
+async function cleanupImages(paths, remaining) {
+  const used = new Set(remaining.map((x) => x.image).filter(Boolean));
+  for (const p of new Set(paths.filter(Boolean))) if (!used.has(p)) await api.deleteImage(p);
+}
+async function removeAnnouncements(list) {
+  const ids = list.map((x) => x.id);
+  await api.deleteAnnouncements(ids);
+  await cleanupImages(list.map((x) => x.image), items.filter((x) => !ids.includes(x.id)));
+}
+
 function openEditor(a, preset = {}) {
   editingId = a ? a.id : null;
   const f = $('#form'); f.reset(); $('#formErr').textContent = '';
@@ -542,6 +605,7 @@ function openEditor(a, preset = {}) {
   const src = a || { type: 'event', status: cfg.draftFirst ? 'draft' : 'published', date: TODAY, audience: cfg.audience, ...preset };
   for (const k of ['title', 'type', 'status', 'date', 'end', 'where', 'audience', 'body']) f.elements[k].value = src[k] || '';
   f.elements.pinned.checked = !!src.pinned;
+  resetPhoto(a ? a.image || '' : '');
   preview(); $('#editDlg').showModal(); f.elements.title.focus();
 }
 function formData() {
@@ -552,6 +616,7 @@ function formData() {
 function preview() {
   const d = formData();
   $('#pImg').className = 'img ' + d.type;
+  setPhotoPreview();
   $('#pType').className = 'pill ' + d.type; $('#pType').textContent = TYPE[d.type];
   $('#pStatus').className = 'st ' + d.status; $('#pStatus').textContent = STATUS[d.status];
   $('#pTitle').textContent = d.title || 'Untitled announcement';
@@ -568,13 +633,24 @@ $('#form').addEventListener('submit', async (e) => {
   if (d.end && d.end < d.date) return ($('#formErr').textContent = 'End date can’t be before the start date.');
   if (d.end === d.date) d.end = '';
   const btn = $('#formSubmit'); btn.disabled = true;
+  const old = photo.current;
+  let uploaded = '';
   try {
+    if (photo.blob) { $('#formErr').textContent = 'Uploading photo…'; uploaded = d.image = await api.uploadImage(photo.blob); }
+    else if (photo.removed) d.image = '';
+    else d.image = old;
+    $('#formErr').textContent = '';
     await api.saveAnnouncement(editingId ? { id: editingId, ...d } : d);
+    if (old && d.image !== old) await cleanupImages([old], items.filter((x) => x.id !== editingId));
+    uploaded = '';
     api.log(editingId ? `Edited “${d.title}”` : `${d.status === 'draft' ? 'Drafted' : 'Published'} “${d.title}”`);
     $('#editDlg').close();
     toast(editingId ? 'Changes saved' : d.status === 'draft' ? 'Saved as draft' : 'Published to students');
     await refresh();
-  } catch (err) { $('#formErr').textContent = 'Couldn’t save: ' + err.message; }
+  } catch (err) {
+    $('#formErr').textContent = 'Couldn’t save: ' + err.message;
+    if (uploaded) api.deleteImage(uploaded); // don't leave an orphaned upload behind
+  }
   finally { btn.disabled = false; }
 });
 
@@ -662,11 +738,11 @@ document.addEventListener('click', async (e) => {
     case 'del':
       if (!confirm(`Delete “${a.title}”? Students will no longer see it.`)) return;
       selected.delete(a.id);
-      return run(async () => { await api.deleteAnnouncements([a.id]); api.log(`Deleted “${a.title}”`); }, 'Deleted');
+      return run(async () => { await removeAnnouncements([a]); api.log(`Deleted “${a.title}”`); }, 'Deleted');
     case 'delCurrent': {
       const c = byId(editingId); if (!c || !confirm(`Delete “${c.title}”?`)) return;
       $('#editDlg').close();
-      return run(async () => { await api.deleteAnnouncements([c.id]); api.log(`Deleted “${c.title}”`); }, 'Deleted');
+      return run(async () => { await removeAnnouncements([c]); api.log(`Deleted “${c.title}”`); }, 'Deleted');
     }
     case 'bulkPublish': case 'bulkDraft': {
       const s = b.dataset.act === 'bulkPublish' ? 'published' : 'draft', ids = [...selected];
@@ -677,7 +753,7 @@ document.addEventListener('click', async (e) => {
       const ids = [...selected];
       if (!confirm(`Delete ${ids.length} announcements?`)) return;
       selected.clear();
-      return run(async () => { await api.deleteAnnouncements(ids); api.log(`Deleted ${ids.length} announcements`); }, `${ids.length} deleted`);
+      return run(async () => { await removeAnnouncements(items.filter((x) => ids.includes(x.id))); api.log(`Deleted ${ids.length} announcements`); }, `${ids.length} deleted`);
     }
     case 'bulkClear': selected.clear(); return renderTable();
     case 'export': return exportCsv();

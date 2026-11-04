@@ -20,7 +20,7 @@ Then open http://localhost:8000/login.html. (Pages use ES modules, so open them 
 
 - `public/login.html`: sign in, create account, forgot/reset password.
 - `public/index.html`: student home. Shows posts for the student's year level, filter by type, search, sort, calendar day filter, register/join/remind, save (★), notifications, add to calendar (.ics), copy link, profile (name, year, password), display settings.
-- `public/admin.html`: admin panel for admins and faculty. Dashboard, announcements table (create/edit/publish/unpublish/pin/duplicate/delete, bulk actions, CSV export), sign-up lists per announcement (with CSV), month calendar, users (admins only: roles, suspend, year level), settings.
+- `public/admin.html`: admin panel for admins and faculty. Dashboard, announcements table (create/edit/publish/unpublish/pin/duplicate/delete, photos, bulk actions, CSV export), sign-up lists per announcement (with CSV), month calendar, users (admins only: roles, suspend, year level), settings.
 
 ## Code
 
@@ -28,3 +28,5 @@ Then open http://localhost:8000/login.html. (Pages use ES modules, so open them 
 - `public/config.js`: Supabase URL and anon key.
 - `supabase/schema.sql`: full database setup for a new project (tables, row level security, triggers, sample data).
 - `supabase/migrations/`: changes to run on an existing database, in order. `schema.sql` already includes them.
+  - `002_year_level.sql`: student year levels
+  - `003_photos.sql`: announcement photos (storage bucket `announcement-images`)
