@@ -82,16 +82,16 @@ a{color:inherit;text-decoration:none}
 .card .link{color:var(--blue);font-weight:600;margin:0 14px 14px;padding:0;background:none;border:0;text-align:left}
 .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:32px;background:var(--white);border:1px dashed var(--border);border-radius:16px}
 /* right */
-.rail{padding:24px 22px 24px 0;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh;overflow-y:auto;align-self:start}
-.panel{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:18px}
+.rail{padding:24px 22px 24px 0;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh;overflow:hidden;align-self:start}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
 .panel header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .panel header b{font-size:16px;display:flex;gap:10px;align-items:center}
 .panel header .linkbtn{font-size:13px}
 .calnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-weight:700}
 .calnav button{background:none;border:0;font-size:18px;color:var(--blue);padding:0 6px}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:6px 0;font-size:13px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px 0;font-size:13px}
 .cal .dow{color:var(--muted);font-size:12px}
-.cal button{position:relative;width:34px;height:34px;margin:auto;border:0;border-radius:50%;background:none;font:inherit;color:var(--text)}
+.cal button{position:relative;width:30px;height:30px;margin:auto;border:0;border-radius:50%;background:none;font:inherit;color:var(--text)}
 .cal button:hover{background:var(--blue-50)}
 .cal button.hl{background:var(--blue-100)}
 .cal button.sel{background:var(--blue);color:#fff;font-weight:700}
@@ -99,7 +99,7 @@ a{color:inherit;text-decoration:none}
 .cal button.sel.dot::after{background:#fff}
 .cal button.blank{visibility:hidden}
 .up{display:flex;flex-direction:column}
-.up .it{display:grid;grid-template-columns:14px 1fr auto;gap:10px;padding:12px 8px;margin:0 -8px;position:relative;align-items:start;background:none;border:0;border-radius:10px;text-align:left;width:calc(100% + 16px)}
+.up .it{display:grid;grid-template-columns:14px 1fr auto;gap:10px;padding:8px;margin:0 -8px;position:relative;align-items:start;background:none;border:0;border-radius:10px;text-align:left;width:calc(100% + 16px)}
 .up .it::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--blue);margin-top:5px}
 .up .it:not(:last-child)::after{content:"";position:absolute;left:12px;top:26px;bottom:-12px;width:2px;background:var(--blue-100)}
 .up .it b{display:block}
@@ -331,7 +331,7 @@ function renderUpcoming() {
   const today = iso(2026, 10, 4); // mock "today" to match the design
   let list = data.filter((a) => (a.end || a.date) >= today).sort((a, b) => a.date.localeCompare(b.date));
   if (selectedDay) list = data.filter((a) => a.date <= selectedDay && (a.end || a.date) >= selectedDay);
-  $('#upcoming').innerHTML = list.length ? list.slice(0, 5).map((a) => `
+  $('#upcoming').innerHTML = list.length ? list.slice(0, 3).map((a) => `
     <button class="it" data-detail="${a.id}">
       <span></span>
       <div><b>${fmtRange(a)}</b><span>${esc(a.title)}</span></div>
