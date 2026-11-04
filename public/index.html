@@ -301,6 +301,7 @@ dialog .acts .sp{flex:1}
   <button class="ni" data-view="mine"><b>✓ My list</b><small>Events and activities you joined</small></button>
   <button class="ni" data-view="saved"><b>★ Saved</b><small>Announcements you bookmarked</small></button>
   <button class="ni" data-act="settings"><b>⚙ Settings</b><small>Display and data</small></button>
+  <a class="ni" href="admin.html" style="color:inherit"><b>🛠 Admin panel</b><small>Manage announcements and users</small></a>
   <button class="ni" data-act="signout"><b>Sign out</b><small>Signed in as Paul Abian · Student</small></button>
 </div>
 
@@ -379,7 +380,9 @@ const persist = () => {
   store.set('custom', custom); store.set('reg', [...reg]); store.set('saved', [...saved]);
   store.set('read', [...read]); store.set('settings', settings);
 };
-const all = () => [...SEED, ...custom];
+// Admin-managed items (admin.html writes cici.items); drafts are hidden from students.
+const adminItems = () => (store.get('items', null) || SEED).filter((a) => a.status !== 'draft');
+const all = () => [...adminItems(), ...custom];
 const byId = (id) => all().find((a) => a.id == id);
 
 /* ---------- state ---------- */
@@ -712,6 +715,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '/' && !e.target.closest('input, textarea, select') && !document.querySelector('dialog[open]')) { e.preventDefault(); $('#search').focus(); }
 });
 window.addEventListener('hashchange', fromHash);
+window.addEventListener('storage', (e) => { if (e.key === 'cici.items') renderAll(); });
 window.addEventListener('resize', closeMenus);
 
 let paused = false;
