@@ -175,307 +175,552 @@ dialog .acts{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
   footer{flex-direction:column;align-items:flex-start;gap:6px}
   .hero .cta{width:100%;text-align:center}
 }
+
+/* added: actions, filters, forms */
+.newbtn{white-space:nowrap;flex:none}
+.avbtn{display:none;width:44px;height:44px;border-radius:50%;border:0;background:#dbe7ff;color:var(--blue-d);font-weight:700;flex:none}
+.secR{display:flex;gap:12px;align-items:center}
+.sort{font:inherit;font-size:13px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--white);color:var(--text)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-4px 0 14px}
+.filters[hidden]{display:none}
+.fchip{background:var(--blue-100);color:var(--blue-d);border:0;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.card .top .r{display:flex;align-items:center;gap:8px}
+.star{background:none;border:0;font-size:20px;line-height:1;color:var(--blue);padding:2px 4px;border-radius:6px}
+.star:hover{background:var(--blue-50)}
+.titlebtn{background:none;border:0;padding:0;font:inherit;font-weight:700;text-align:left;color:inherit;cursor:pointer}
+.titlebtn:hover{color:var(--blue)}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 14px 14px}
+.card .foot .btn{padding:7px 12px;font-size:13px}
+.btn.done{background:#e7f6ee;border-color:#bfe6cf;color:#0f6b55}
+.btn.danger{color:var(--red);border-color:#f3c9c9}
+.mine{font-size:12px;color:var(--muted)}
+.cal button.today{box-shadow:inset 0 0 0 2px var(--blue)}
+.cal button.sel.today{box-shadow:none}
+.up .it b{white-space:nowrap}
+dialog .acts{flex-wrap:wrap}
+dialog .acts .sp{flex:1}
+.fld{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--muted);margin-top:12px}
+.fld input,.fld select,.fld textarea{font:inherit;font-size:15px;font-weight:400;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--white);width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:600}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-top:8px}
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.setrow small{display:block;color:var(--muted)}
+.setrow input{width:20px;height:20px}
+#profileMenu{position:fixed;top:auto;right:auto;width:240px}
+.compact .img{display:none}
+.nohero .hero{display:none}
+.nohero .quick{margin-top:20px}
+@media (max-width:1100px){.avbtn{display:grid;place-items:center}}
+@media (max-width:560px){.newbtn{padding:10px 12px}.newbtn .lbl{display:none}.row2{grid-template-columns:1fr}.secR .sort{max-width:120px}}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <aside class="side">
     <div class="logo"><div class="mark"></div><div><b>CICI</b><small>Announcement<br>System</small></div></div>
     <nav class="nav" id="nav">
-      <button class="on" data-view="all"><span class="ic"></span>Home</button>
+      <button data-view="all"><span class="ic"></span>Home</button>
       <button data-view="event"><span class="ic"></span>Events</button>
       <button data-view="activity"><span class="ic"></span>Activities</button>
       <button data-view="exam"><span class="ic"></span>Exams</button>
       <hr>
-      <button id="navNotif"><span class="ic round"></span>Notifications <span class="badge" id="navBadge">2</span></button>
-      <button id="navSettings"><span class="ic round"></span>Settings</button>
+      <button data-act="notif"><span class="ic round"></span>Notifications <span class="badge" id="navBadge"></span></button>
+      <button data-act="settings"><span class="ic round"></span>Settings</button>
     </nav>
     <div class="user">
-      <button id="userBtn"><div class="avatar">PA</div><div><b>Paul Abian</b><small>Student ▾</small></div></button>
+      <button data-act="profile"><div class="avatar">PA</div><div><b>Paul Abian</b><small>Student ▾</small></div></button>
     </div>
   </aside>
 
   <main class="main">
-    <div class="toprow" style="display:flex;gap:14px;align-items:center;position:relative">
-      <label class="search"><span aria-hidden="true">🔍</span><input id="search" placeholder="Search announcements, events..." aria-label="Search"></label>
-      <button class="bell" id="bellBtn" aria-label="Notifications">🔔<span class="badge" id="bellBadge">2</span></button>
+    <div class="toprow" style="position:relative">
+      <label class="search"><span aria-hidden="true">🔍</span><input id="search" type="search" placeholder="Search announcements, events...  ( / )" aria-label="Search"></label>
+      <button class="btn primary newbtn" data-act="new" aria-label="New announcement">+ <span class="lbl">New</span></button>
+      <button class="bell" data-act="notif" aria-label="Notifications">🔔<span class="badge" id="bellBadge"></span></button>
+      <button class="avbtn" data-act="profile" aria-label="Profile">PA</button>
       <div class="dropdown" id="notifMenu" hidden></div>
     </div>
 
     <section class="hero" id="hero">
-      <span class="chip" id="heroChip">📢 Latest Announcement</span>
-      <h2 id="heroTitle">Welcome to CICI!</h2>
-      <p id="heroText">Stay updated with the latest events, activities, and exams.</p>
-      <button class="cta" id="heroCta">View All Announcements →</button>
+      <span class="chip" id="heroChip"></span>
+      <h2 id="heroTitle"></h2>
+      <p id="heroText"></p>
+      <button class="cta" id="heroCta"></button>
       <div class="bldg"></div>
       <div class="mega"></div>
       <div class="dots" id="heroDots"></div>
     </section>
 
     <section class="quick">
-      <button class="qcard" data-view="event"><div class="ico">📅</div><div><b>Events</b><small>Check upcoming events</small></div><span class="go">›</span></button>
-      <button class="qcard" data-view="activity"><div class="ico">🏆</div><div><b>Activities</b><small>Join and participate</small></div><span class="go">›</span></button>
-      <button class="qcard" data-view="exam"><div class="ico">📄</div><div><b>Exams</b><small>View exam schedules</small></div><span class="go">›</span></button>
+      <button class="qcard" data-view="event"><div class="ico">📅</div><div><b>Events</b><small id="qEvent">Check upcoming events</small></div><span class="go">›</span></button>
+      <button class="qcard" data-view="activity"><div class="ico">🏆</div><div><b>Activities</b><small id="qActivity">Join and participate</small></div><span class="go">›</span></button>
+      <button class="qcard" data-view="exam"><div class="ico">📄</div><div><b>Exams</b><small id="qExam">View exam schedules</small></div><span class="go">›</span></button>
     </section>
 
-    <div class="sec"><h3 id="updatesTitle">Latest Updates</h3><button class="linkbtn" data-view="all">See all →</button></div>
+    <div class="sec" id="updates"><h3 id="updatesTitle">Latest Updates</h3>
+      <div class="secR">
+        <select class="sort" id="sort" aria-label="Sort">
+          <option value="soon">Soonest first</option>
+          <option value="new">Newest posted</option>
+          <option value="az">Title A–Z</option>
+        </select>
+        <button class="linkbtn" data-act="clear">See all →</button>
+      </div>
+    </div>
     <div class="chips" id="chips">
-      <button class="on" data-view="all">All</button>
+      <button data-view="all">All</button>
       <button data-view="event">Events</button>
       <button data-view="activity">Activities</button>
       <button data-view="exam">Exams</button>
+      <button data-view="saved">★ Saved</button>
+      <button data-view="mine">✓ My list</button>
     </div>
+    <div class="filters" id="filters" hidden></div>
     <section class="cards" id="cards"></section>
 
     <footer>
-    <span><b>CICI</b> &nbsp;•&nbsp; Connect. Learn. Participate.</span>
-    <span>Stay informed. Stay ahead. ♡</span>
+      <span><b>CICI</b> &nbsp;•&nbsp; Connect. Learn. Participate.</span>
+      <span>Stay informed. Stay ahead. ♡</span>
     </footer>
   </main>
 
   <aside class="rail">
     <div class="panel">
-      <header><b>📅 Academic Calendar</b><button class="linkbtn" id="todayBtn">Today</button></header>
-      <div class="calnav"><button id="prevMonth" aria-label="Previous month">‹</button><span id="monthLabel"></span><button id="nextMonth" aria-label="Next month">›</button></div>
+      <header><b>📅 Academic Calendar</b><button class="linkbtn" data-act="today">Today</button></header>
+      <div class="calnav"><button data-act="prevMonth" aria-label="Previous month">‹</button><span id="monthLabel"></span><button data-act="nextMonth" aria-label="Next month">›</button></div>
       <div class="cal" id="cal"></div>
     </div>
     <div class="panel">
-      <header><b>🕒 Upcoming</b><button class="linkbtn" data-view="all">See all →</button></header>
+      <header><b>🕒 Upcoming</b><button class="linkbtn" data-act="clear">See all →</button></header>
       <div class="up" id="upcoming"></div>
     </div>
   </aside>
+</div>
 
+<div class="dropdown" id="profileMenu" hidden>
+  <button class="ni" data-view="mine"><b>✓ My list</b><small>Events and activities you joined</small></button>
+  <button class="ni" data-view="saved"><b>★ Saved</b><small>Announcements you bookmarked</small></button>
+  <button class="ni" data-act="settings"><b>⚙ Settings</b><small>Display and data</small></button>
+  <button class="ni" data-act="signout"><b>Sign out</b><small>Signed in as Paul Abian · Student</small></button>
 </div>
 
 <dialog id="detail"><div class="box" id="detailBody"></div></dialog>
+
+<dialog id="formDlg">
+  <form class="box" id="form" novalidate>
+    <h3 id="formTitle">New announcement</h3>
+    <label class="fld">Title<input name="title" maxlength="80" required></label>
+    <div class="row2">
+      <label class="fld">Type<select name="type"><option value="event">Event</option><option value="activity">Activity</option><option value="exam">Exam</option></select></label>
+      <label class="fld">Location<input name="where" maxlength="60" placeholder="e.g. Room 105 or Online"></label>
+    </div>
+    <div class="row2">
+      <label class="fld">Start date<input name="date" type="date" required></label>
+      <label class="fld">End date (optional)<input name="end" type="date"></label>
+    </div>
+    <label class="fld">Details<textarea name="body" rows="3" maxlength="300"></textarea></label>
+    <label class="chk"><input type="checkbox" name="pinned"> Pin to top</label>
+    <div class="err" id="formErr" role="alert"></div>
+    <div class="acts">
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn primary" id="formSubmit">Publish</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="settingsDlg">
+  <div class="box">
+    <h3>Settings</h3>
+    <label class="setrow"><span>Show welcome banner<small>The rotating banner at the top</small></span><input type="checkbox" id="setHero"></label>
+    <label class="setrow"><span>Compact cards<small>Hide card images</small></span><input type="checkbox" id="setCompact"></label>
+    <label class="setrow"><span>Auto-rotate banner<small>Change slide every 6 seconds</small></span><input type="checkbox" id="setRotate"></label>
+    <div class="setrow"><span>Reset demo data<small>Removes your posts, saved items and sign-ups</small></span><button class="btn danger" data-act="reset">Reset</button></div>
+    <div class="acts"><button class="btn primary" data-close>Done</button></div>
+  </div>
+</dialog>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ---------- data ---------- */
-const TYPE = { event: 'Events', activity: 'Activities', exam: 'Exams' };
-const TAG_CLASS = { event: '', activity: 'act', exam: 'exam' };
+/* ---------- constants ---------- */
+const TYPE = { event: 'Events', activity: 'Activities', exam: 'Exams', saved: 'Saved', mine: 'My list' };
 const PILL = { event: 'Event', activity: 'Activity', exam: 'Exam' };
+const TAG = { event: '', activity: 'act', exam: 'exam' };
 const IMG = { event: '', activity: 'green', exam: 'paper' };
-const CTA = { event: 'Register Now', activity: 'Join Activity', exam: 'View Details' };
+const ACTION = { event: ['Register', 'Registered ✓'], activity: ['Join', 'Joined ✓'], exam: ['Remind me', 'Reminder set ✓'] };
+const HASH = { all: '', event: 'events', activity: 'activities', exam: 'exams', saved: 'saved', mine: 'mine' };
 
-const data = [
-  { id: 1, type: 'event', title: 'CICI Week 2026', date: '2026-11-15', end: '2026-11-21', where: 'Main Campus', pinned: true,
-    body: 'A week of fun, learning, and community!' },
-  { id: 2, type: 'activity', title: 'Green Campus Initiative', date: '2026-11-10', end: '2026-11-30', where: 'Campus Grounds',
-    body: 'Join our tree planting activity.' },
-  { id: 3, type: 'exam', title: 'Midterm Examination', date: '2026-11-20', where: 'Online',
-    body: 'Coverage: Modules 1–5.' },
-  { id: 4, type: 'activity', title: 'Activity Deadline', date: '2026-11-30', where: 'Student Affairs Office',
-    body: 'Last day to submit your activity sign-up form.' },
-  { id: 5, type: 'event', title: 'Freshmen Orientation', date: '2026-11-09', where: 'Auditorium',
-    body: 'Welcome session, campus tour and club sign-ups.' },
-  { id: 6, type: 'exam', title: 'Data Structures Quiz', date: '2026-11-12', where: 'Room 105',
-    body: 'Chapters 4–6. Bring your student ID.' },
+const SEED = [
+  { id: 1, type: 'event', title: 'CICI Week 2026', date: '2026-11-15', end: '2026-11-21', where: 'Main Campus', pinned: true, body: 'A week of fun, learning, and community!' },
+  { id: 2, type: 'activity', title: 'Green Campus Initiative', date: '2026-11-10', end: '2026-11-30', where: 'Campus Grounds', body: 'Join our tree planting activity.' },
+  { id: 3, type: 'exam', title: 'Midterm Examination', date: '2026-11-20', where: 'Online', body: 'Coverage: Modules 1–5.' },
+  { id: 4, type: 'activity', title: 'Activity Deadline', date: '2026-11-30', where: 'Student Affairs Office', body: 'Last day to submit your activity sign-up form.' },
+  { id: 5, type: 'event', title: 'Freshmen Orientation', date: '2026-11-09', where: 'Auditorium', body: 'Welcome session, campus tour and club sign-ups.' },
+  { id: 6, type: 'exam', title: 'Data Structures Quiz', date: '2026-11-12', where: 'Room 105', body: 'Chapters 4–6. Bring your student ID.' },
 ];
 
-const heroSlides = [
+const SLIDES = [
   { chip: '📢 Latest Announcement', title: 'Welcome to CICI!', text: 'Stay updated with the latest events, activities, and exams.', cta: 'View All Announcements →', view: 'all' },
   { chip: '📅 Event', title: 'CICI Week is Coming', text: 'A week of fun, learning, and community starts November 15.', cta: 'See Events →', view: 'event' },
   { chip: '📄 Exam', title: 'Midterms Are Near', text: 'Check the exam schedule and prepare early.', cta: 'View Exams →', view: 'exam' },
 ];
 
-const notifications = [
-  { title: 'Midterm Examination', sub: 'Nov 20 · Coverage: Modules 1–5' },
-  { title: 'CICI Week 2026 starts soon', sub: 'Nov 15 · Main Campus' },
-  { title: 'Activity deadline reminder', sub: 'Nov 30 · Sign up before the deadline' },
-];
+/* ---------- storage (safe if blocked) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('cici.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('cici.' + k, JSON.stringify(v)); } catch {} },
+};
+let custom = store.get('custom', []);
+let reg = new Set(store.get('reg', []));
+let saved = new Set(store.get('saved', []));
+let read = new Set(store.get('read', []));
+let settings = Object.assign({ hero: true, compact: false, rotate: true }, store.get('settings', {}));
+const persist = () => {
+  store.set('custom', custom); store.set('reg', [...reg]); store.set('saved', [...saved]);
+  store.set('read', [...read]); store.set('settings', settings);
+};
+const all = () => [...SEED, ...custom];
+const byId = (id) => all().find((a) => a.id == id);
 
 /* ---------- state ---------- */
-let view = 'all';
-let query = '';
-let selectedDay = null;
-let heroIndex = 0;
-let calYear = 2026, calMonth = 10; // November 2026 (0-indexed month)
-let notifUnread = notifications.length;
+const now = new Date();
+const TODAY = iso(now.getFullYear(), now.getMonth(), now.getDate());
+let view = 'all', query = '', sort = 'soon', selectedDay = null, heroIndex = 0, editingId = null;
+let calYear = now.getFullYear(), calMonth = now.getMonth();
 
 /* ---------- helpers ---------- */
 const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const iso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-const fmtDate = (s) => new Date(s + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-const fmtRange = (a) => a.end ? `${fmtDate(a.date)} – ${fmtDate(a.end)}` : fmtDate(a.date);
-const monthName = (y, m) => new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+function iso(y, m, d) { return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const D = (s) => new Date(s + 'T00:00:00');
+const fmt = (s, o) => D(s).toLocaleDateString(undefined, o);
+const fmtLong = (a) => a.end && a.end !== a.date ? `${fmt(a.date, { month: 'short', day: 'numeric' })} – ${fmt(a.end, { month: 'short', day: 'numeric', year: 'numeric' })}` : fmt(a.date, { month: 'short', day: 'numeric', year: 'numeric' });
+const fmtShort = (a) => {
+  if (!a.end || a.end === a.date) return fmt(a.date, { month: 'short', day: 'numeric' });
+  const sameMonth = a.date.slice(0, 7) === a.end.slice(0, 7);
+  return `${fmt(a.date, { month: 'short', day: 'numeric' })} – ${sameMonth ? D(a.end).getDate() : fmt(a.end, { month: 'short', day: 'numeric' })}`;
+};
+const endOf = (a) => a.end || a.date;
+const covers = (a, day) => a.date <= day && endOf(a) >= day;
+const daysUntil = (s) => Math.round((D(s) - D(TODAY)) / 86400000);
+const when = (a) => {
+  if (covers(a, TODAY)) return 'Happening now';
+  const n = daysUntil(a.date);
+  return n < 0 ? 'Ended' : n === 0 ? 'Today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
+};
 
 let toastTimer;
 function toast(msg) {
-  const t = $('#toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+function closeMenus() { $('#notifMenu').hidden = true; $('#profileMenu').hidden = true; }
+
+/* ---------- notifications: anything starting within 14 days, or that you posted ---------- */
+function notifications() {
+  return all().filter((a) => (daysUntil(a.date) >= 0 && daysUntil(a.date) <= 14) || covers(a, TODAY) || a.own)
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function openDetail(a) {
-  $('#detailBody').innerHTML = `
-    <span class="pill ${a.type === 'activity' ? 'act' : a.type === 'exam' ? 'exam' : ''}">${PILL[a.type]}</span>
-    <h3>${esc(a.title)}</h3>
-    <div class="meta"><span>📅 ${fmtRange(a)}</span><span>📍 ${esc(a.where)}</span></div>
-    <p>${esc(a.body)}</p>
-    <div class="acts">
-      <button class="btn" data-close>Close</button>
-      <button class="btn primary" data-cta="${a.id}">${CTA[a.type]}</button>
-    </div>`;
-  $('#detail').showModal();
-}
-
-/* ---------- hero ---------- */
-function renderHero() {
-  const s = heroSlides[heroIndex];
-  $('#heroChip').textContent = s.chip;
-  $('#heroTitle').textContent = s.title;
-  $('#heroText').textContent = s.text;
-  $('#heroCta').textContent = s.cta;
-  $('#heroCta').dataset.view = s.view;
-  $('#heroDots').innerHTML = heroSlides.map((_, i) =>
-    `<button class="${i === heroIndex ? 'on' : ''}" data-dot="${i}" aria-label="Slide ${i + 1}"></button>`).join('');
-}
-
-/* ---------- cards ---------- */
+/* ---------- filtering ---------- */
 function filtered() {
   const q = query.trim().toLowerCase();
-  return data
-    .filter((a) => view === 'all' || a.type === view)
-    .filter((a) => !q || (a.title + ' ' + a.body + ' ' + a.where).toLowerCase().includes(q))
-    .filter((a) => !selectedDay || a.date <= selectedDay && (a.end || a.date) >= selectedDay)
-    .sort((a, b) => (b.pinned - a.pinned) || a.date.localeCompare(b.date));
+  const list = all()
+    .filter((a) => view === 'all' || (view === 'saved' ? saved.has(a.id) : view === 'mine' ? reg.has(a.id) : a.type === view))
+    .filter((a) => !q || [a.title, a.body, a.where, PILL[a.type]].join(' ').toLowerCase().includes(q))
+    .filter((a) => !selectedDay || covers(a, selectedDay));
+  const cmp = {
+    soon: (a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.date.localeCompare(b.date),
+    new: (a, b) => b.id - a.id,
+    az: (a, b) => a.title.localeCompare(b.title),
+  }[sort];
+  return list.sort(cmp);
+}
+
+/* ---------- render ---------- */
+function renderHero() {
+  const s = SLIDES[heroIndex];
+  $('#heroChip').textContent = s.chip; $('#heroTitle').textContent = s.title;
+  $('#heroText').textContent = s.text; $('#heroCta').textContent = s.cta; $('#heroCta').dataset.view = s.view;
+  $('#heroDots').innerHTML = SLIDES.map((_, i) => `<button class="${i === heroIndex ? 'on' : ''}" data-dot="${i}" aria-label="Slide ${i + 1}"></button>`).join('');
+}
+
+function renderQuick() {
+  const count = (t) => all().filter((a) => a.type === t && endOf(a) >= TODAY).length;
+  $('#qEvent').textContent = `${count('event')} upcoming events`;
+  $('#qActivity').textContent = `${count('activity')} open activities`;
+  $('#qExam').textContent = `${count('exam')} scheduled exams`;
+}
+
+function actionBtn(a, cls = '') {
+  const on = reg.has(a.id);
+  return `<button class="btn ${on ? 'done' : 'primary'} ${cls}" data-act="reg" data-id="${a.id}">${ACTION[a.type][on ? 1 : 0]}</button>`;
 }
 
 function renderCards() {
   const list = filtered();
   $('#updatesTitle').textContent = view === 'all' ? 'Latest Updates' : TYPE[view];
-  document.querySelectorAll('#chips button').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
-  document.querySelectorAll('#nav button[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
+  document.querySelectorAll('#chips button, #nav button[data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
+
+  const f = [];
+  if (selectedDay) f.push(`<button class="fchip" data-act="clearDay">📅 ${fmt(selectedDay, { weekday: 'short', month: 'short', day: 'numeric' })} ✕</button>`);
+  if (query.trim()) f.push(`<button class="fchip" data-act="clearSearch">🔍 “${esc(query.trim())}” ✕</button>`);
+  $('#filters').innerHTML = f.length ? `<span class="mine">${list.length} result${list.length === 1 ? '' : 's'} ·</span>${f.join('')}<button class="linkbtn" data-act="clear">Clear all</button>` : '';
+  $('#filters').hidden = !f.length;
+
+  const emptyMsg = view === 'saved' ? 'Nothing saved yet. Tap ☆ on any announcement to save it.'
+    : view === 'mine' ? 'You haven’t joined anything yet.'
+    : selectedDay ? 'Nothing scheduled on this day.' : 'No announcements match.';
   $('#cards').innerHTML = list.length ? list.map((a) => `
     <article class="card">
-      <div class="top"><span class="tag ${TAG_CLASS[a.type]}">${TYPE[a.type]}</span>${a.pinned ? '<span class="pin">📌 Pinned</span>' : ''}</div>
+      <div class="top">
+        <span class="tag ${TAG[a.type]}">${TYPE[a.type]}</span>
+        <span class="r">${a.pinned ? '<span class="pin">📌 Pinned</span>' : ''}
+          <button class="star" data-act="save" data-id="${a.id}" aria-pressed="${saved.has(a.id)}" aria-label="${saved.has(a.id) ? 'Remove from saved' : 'Save'}">${saved.has(a.id) ? '★' : '☆'}</button></span>
+      </div>
       <div class="img ${IMG[a.type]}"></div>
       <div class="body">
-        <h4>${esc(a.title)}</h4>
-        <div class="meta"><span>📅 ${fmtRange(a)}</span><span>📍 ${esc(a.where)}</span></div>
+        <h4><button class="titlebtn" data-act="open" data-id="${a.id}">${esc(a.title)}</button></h4>
+        <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}</div>
         <p>${esc(a.body)}</p>
+        <span class="mine">${when(a)}${a.own ? ' · Posted by you' : ''}</span>
       </div>
-      <button class="link" data-detail="${a.id}">${CTA[a.type]} →</button>
-    </article>`).join('')
-    : `<div class="empty">No ${view === 'all' ? 'announcements' : TYPE[view].toLowerCase()} match your search.</div>`;
+      <div class="foot">${actionBtn(a)}<button class="linkbtn" data-act="open" data-id="${a.id}">Details →</button></div>
+    </article>`).join('') : `<div class="empty">${emptyMsg}</div>`;
 }
 
-/* ---------- calendar ---------- */
 function renderCal() {
-  $('#monthLabel').textContent = monthName(calYear, calMonth);
+  $('#monthLabel').textContent = new Date(calYear, calMonth, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const first = new Date(calYear, calMonth, 1).getDay();
   const days = new Date(calYear, calMonth + 1, 0).getDate();
+  const marks = new Set(); all().forEach((a) => { marks.add(a.date); marks.add(endOf(a)); });
   let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<span class="dow">${d}</span>`).join('');
-  for (let i = 0; i < first; i++) html += '<button class="blank" disabled></button>';
+  for (let i = 0; i < first; i++) html += '<button class="blank" disabled tabindex="-1"></button>';
   for (let d = 1; d <= days; d++) {
-    const key = iso(calYear, calMonth, d);
-    const has = data.some((a) => a.date <= key && (a.end || a.date) >= key);
-    const cls = [selectedDay === key ? 'sel' : '', has ? 'dot' : ''].join(' ').trim();
-    html += `<button class="${cls}" data-day="${key}" aria-label="${key}">${d}</button>`;
+    const k = iso(calYear, calMonth, d);
+    const cls = [k === selectedDay && 'sel', k === TODAY && 'today', marks.has(k) && 'dot'].filter(Boolean).join(' ');
+    const n = all().filter((a) => covers(a, k)).length;
+    html += `<button class="${cls}" data-day="${k}" aria-label="${fmt(k, { month: 'long', day: 'numeric' })}${n ? `, ${n} item${n > 1 ? 's' : ''}` : ''}">${d}</button>`;
   }
   $('#cal').innerHTML = html;
 }
 
-/* ---------- upcoming ---------- */
 function renderUpcoming() {
-  const today = iso(2026, 10, 4); // mock "today" to match the design
-  let list = data.filter((a) => (a.end || a.date) >= today).sort((a, b) => a.date.localeCompare(b.date));
-  if (selectedDay) list = data.filter((a) => a.date <= selectedDay && (a.end || a.date) >= selectedDay);
-  $('#upcoming').innerHTML = list.length ? list.slice(0, 3).map((a) => `
-    <button class="it" data-detail="${a.id}">
+  const list = (selectedDay ? all().filter((a) => covers(a, selectedDay)) : all().filter((a) => endOf(a) >= TODAY))
+    .sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+  $('#upcoming').innerHTML = list.length ? list.map((a) => `
+    <button class="it" data-act="open" data-id="${a.id}">
       <span></span>
-      <div><b>${fmtRange(a)}</b><span>${esc(a.title)}</span></div>
-      <span class="pill ${a.type === 'activity' ? 'act' : a.type === 'exam' ? 'exam' : ''}">${PILL[a.type]}</span>
-    </button>`).join('')
-    : '<p class="none">Nothing scheduled for this day.</p>';
+      <div><b>${fmtShort(a)}</b><span>${esc(a.title)}</span></div>
+      <span class="pill ${TAG[a.type]}">${PILL[a.type]}</span>
+    </button>`).join('') : `<p class="none">${selectedDay ? 'Nothing on this day.' : 'Nothing upcoming.'}</p>`;
 }
 
-/* ---------- notifications ---------- */
 function renderNotif() {
-  $('#navBadge').textContent = notifUnread;
-  $('#navBadge').hidden = !notifUnread;
-  $('#bellBadge').textContent = notifUnread;
-  $('#bellBadge').hidden = !notifUnread;
-  $('#notifMenu').innerHTML = notifications.map((n) =>
-    `<button class="ni"><b>${esc(n.title)}</b><small>${esc(n.sub)}</small></button>`).join('')
-    + `<button class="ni" data-mark-read style="text-align:center;color:var(--blue);font-weight:600">Mark all as read</button>`;
+  const list = notifications();
+  const unread = list.filter((a) => !read.has(a.id)).length;
+  for (const id of ['#navBadge', '#bellBadge']) { $(id).textContent = unread; $(id).hidden = !unread; }
+  $('#notifMenu').innerHTML = (list.length ? list.map((a) => `
+    <button class="ni" data-act="open" data-id="${a.id}" style="${read.has(a.id) ? '' : 'background:var(--blue-50)'}">
+      <b>${read.has(a.id) ? '' : '● '}${esc(a.title)}</b><small>${PILL[a.type]} · ${fmtShort(a)} · ${when(a)}</small></button>`).join('')
+    : '<p class="ni"><small>No notifications</small></p>')
+    + (unread ? '<button class="ni" data-act="readAll" style="text-align:center;color:var(--blue);font-weight:600">Mark all as read</button>' : '');
 }
 
-function renderAll() { renderHero(); renderCards(); renderCal(); renderUpcoming(); renderNotif(); }
+function applySettings() {
+  $('#app').classList.toggle('nohero', !settings.hero);
+  $('#app').classList.toggle('compact', settings.compact);
+  $('#setHero').checked = settings.hero; $('#setCompact').checked = settings.compact; $('#setRotate').checked = settings.rotate;
+}
 
-function setView(v) {
-  view = v;
-  selectedDay = null;
+function renderAll() { applySettings(); renderHero(); renderQuick(); renderCards(); renderCal(); renderUpcoming(); renderNotif(); }
+
+/* ---------- detail dialog ---------- */
+function openDetail(id) {
+  const a = byId(id); if (!a) return;
+  read.add(a.id); persist(); renderNotif();
+  $('#detailBody').innerHTML = `
+    <span class="pill ${TAG[a.type]}">${PILL[a.type]}</span> <span class="mine">${when(a)}</span>
+    <h3>${esc(a.title)}</h3>
+    <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}</div>
+    <p>${esc(a.body) || '<span class="mine">No details.</span>'}</p>
+    <div class="acts">
+      <button class="btn" data-act="ics" data-id="${a.id}">📆 Add to calendar</button>
+      <button class="btn" data-act="share" data-id="${a.id}">🔗 Copy link</button>
+      <button class="btn" data-act="save" data-id="${a.id}">${saved.has(a.id) ? '★ Saved' : '☆ Save'}</button>
+    </div>
+    <div class="acts">
+      ${a.own ? `<button class="btn danger" data-act="del" data-id="${a.id}">Delete</button><button class="btn" data-act="edit" data-id="${a.id}">Edit</button>` : ''}
+      <span class="sp"></span>
+      <button class="btn" data-close>Close</button>
+      ${actionBtn(a)}
+    </div>`;
+  if (!$('#detail').open) $('#detail').showModal();
+  history.replaceState(null, '', '#item-' + a.id);
+}
+
+/* ---------- form ---------- */
+function openForm(a) {
+  editingId = a ? a.id : null;
+  const f = $('#form'); f.reset();
+  $('#formTitle').textContent = a ? 'Edit announcement' : 'New announcement';
+  $('#formSubmit').textContent = a ? 'Save changes' : 'Publish';
+  $('#formErr').textContent = '';
+  const src = a || { type: ['event', 'activity', 'exam'].includes(view) ? view : 'event', date: selectedDay || TODAY };
+  for (const k of ['title', 'type', 'where', 'date', 'end', 'body']) f.elements[k].value = src[k] || '';
+  f.elements.pinned.checked = !!src.pinned;
+  if ($('#detail').open) $('#detail').close();
+  $('#formDlg').showModal();
+  f.elements.title.focus();
+}
+
+$('#form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.target.elements;
+  const d = { title: f.title.value.trim(), type: f.type.value, where: f.where.value.trim(), date: f.date.value, end: f.end.value, body: f.body.value.trim(), pinned: f.pinned.checked };
+  if (!d.title) return ($('#formErr').textContent = 'Please add a title.');
+  if (!d.date) return ($('#formErr').textContent = 'Please choose a start date.');
+  if (d.end && d.end < d.date) return ($('#formErr').textContent = 'End date can’t be before the start date.');
+  if (!d.end || d.end === d.date) delete d.end;
+  if (editingId) custom = custom.map((a) => (a.id === editingId ? { ...a, ...d } : a));
+  else custom.push({ id: Date.now(), own: true, ...d });
+  persist(); $('#formDlg').close();
+  const [y, m] = d.date.split('-').map(Number); calYear = y; calMonth = m - 1;
+  renderAll(); toast(editingId ? 'Announcement updated' : 'Announcement published');
+});
+
+/* ---------- .ics download ---------- */
+function downloadIcs(a) {
+  const dt = (s) => s.replace(/-/g, '');
+  const next = (s) => { const x = D(s); x.setDate(x.getDate() + 1); return iso(x.getFullYear(), x.getMonth(), x.getDate()); };
+  const t = (s) => String(s || '').replace(/[\\,;]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CICI//Announcements//EN', 'BEGIN:VEVENT',
+    `UID:cici-${a.id}@cici`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${dt(a.date)}`, `DTEND;VALUE=DATE:${dt(next(endOf(a)))}`,
+    `SUMMARY:${t(a.title)}`, `LOCATION:${t(a.where)}`, `DESCRIPTION:${t(a.body)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  const link = Object.assign(document.createElement('a'), { href: url, download: a.title.replace(/[^\w]+/g, '-') + '.ics' });
+  document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('Calendar file downloaded');
+}
+
+async function copyLink(a) {
+  const url = location.origin + location.pathname + '#item-' + a.id;
+  try { await navigator.clipboard.writeText(url); toast('Link copied'); }
+  catch { prompt('Copy this link:', url); }
+}
+
+/* ---------- navigation ---------- */
+function setView(v, scroll = true) {
+  view = v; selectedDay = null; closeMenus();
+  if ($('#detail').open) $('#detail').close();
+  history.replaceState(null, '', HASH[v] ? '#' + HASH[v] : location.pathname);
   renderAll();
-  $('#cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (scroll) $('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ---------- events ---------- */
+function fromHash() {
+  const h = location.hash.slice(1);
+  const item = h.match(/^item-(\d+)$/);
+  if (item) { renderAll(); openDetail(+item[1]); return; }
+  const v = Object.keys(HASH).find((k) => HASH[k] && HASH[k] === h);
+  view = v || 'all'; renderAll();
+}
+
+function placeMenu(menu, btn) {
+  menu.hidden = false;
+  const r = btn.getBoundingClientRect(), mh = menu.offsetHeight, mw = menu.offsetWidth;
+  const top = r.bottom + 8 + mh > innerHeight ? r.top - mh - 8 : r.bottom + 8;
+  menu.style.top = Math.max(8, top) + 'px';
+  menu.style.left = Math.min(Math.max(8, r.left), innerWidth - mw - 8) + 'px';
+}
+
+/* ---------- clicks ---------- */
 document.addEventListener('click', (e) => {
   const t = e.target;
-  const nav = t.closest('[data-view]');
-  if (nav) { setView(nav.dataset.view); return; }
-
+  const v = t.closest('[data-view]');
+  if (v) return setView(v.dataset.view);
   const dot = t.closest('[data-dot]');
-  if (dot) { heroIndex = +dot.dataset.dot; renderHero(); return; }
-
-  const detail = t.closest('[data-detail]');
-  if (detail) { openDetail(data.find((a) => a.id == detail.dataset.detail)); return; }
-
-  const cta = t.closest('[data-cta]');
-  if (cta) {
-    const a = data.find((x) => x.id == cta.dataset.cta);
-    $('#detail').close();
-    toast(a.type === 'exam' ? `Opened details for ${a.title}` : `You're in: ${a.title}`);
-    return;
-  }
-
+  if (dot) { heroIndex = +dot.dataset.dot; return renderHero(); }
   const day = t.closest('[data-day]');
   if (day) {
     selectedDay = selectedDay === day.dataset.day ? null : day.dataset.day;
     renderCal(); renderUpcoming(); renderCards();
+    if (selectedDay && innerWidth > 1100) $('#updates').scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
+  if (t.closest('[data-close]')) { t.closest('dialog').close(); return; }
 
-  if (t.closest('[data-close]')) { $('#detail').close(); return; }
+  const btn = t.closest('[data-act]');
+  if (!btn) { if (!t.closest('.dropdown')) closeMenus(); return; }
+  const a = btn.dataset.id ? byId(btn.dataset.id) : null;
 
-  if (t.closest('[data-mark-read]')) {
-    notifUnread = 0; renderNotif(); toast('All notifications marked as read');
-    return;
+  switch (btn.dataset.act) {
+    case 'open': closeMenus(); return openDetail(btn.dataset.id);
+    case 'reg': {
+      const on = !reg.has(a.id); on ? reg.add(a.id) : reg.delete(a.id); persist();
+      toast(on ? { event: `Registered for ${a.title}`, activity: `Joined ${a.title}`, exam: `Reminder set for ${a.title}` }[a.type]
+        : { event: 'Registration cancelled', activity: 'You left this activity', exam: 'Reminder removed' }[a.type]);
+      renderCards(); if ($('#detail').open) openDetail(a.id); return;
+    }
+    case 'save': {
+      const on = !saved.has(a.id); on ? saved.add(a.id) : saved.delete(a.id); persist();
+      toast(on ? 'Saved' : 'Removed from saved'); renderCards(); if ($('#detail').open) openDetail(a.id); return;
+    }
+    case 'ics': return downloadIcs(a);
+    case 'share': return copyLink(a);
+    case 'edit': return openForm(a);
+    case 'del':
+      if (!confirm(`Delete “${a.title}”?`)) return;
+      custom = custom.filter((x) => x.id !== a.id); reg.delete(a.id); saved.delete(a.id); persist();
+      $('#detail').close(); renderAll(); return toast('Announcement deleted');
+    case 'new': closeMenus(); return openForm();
+    case 'notif': {
+      const m = $('#notifMenu'); const show = m.hidden; closeMenus(); m.hidden = !show;
+      if (show && btn.closest('.nav')) $('.toprow').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    case 'readAll': notifications().forEach((x) => read.add(x.id)); persist(); renderNotif(); return toast('All caught up');
+    case 'profile': { const m = $('#profileMenu'); const show = m.hidden; closeMenus(); if (show) placeMenu(m, btn); return; }
+    case 'settings': closeMenus(); applySettings(); return $('#settingsDlg').showModal();
+    case 'signout': closeMenus(); return toast('Sign-in isn’t set up yet — this is a demo');
+    case 'reset':
+      if (!confirm('Reset all your posts, saved items and sign-ups?')) return;
+      custom = []; reg = new Set(); saved = new Set(); read = new Set(); settings = { hero: true, compact: false, rotate: true };
+      persist(); $('#settingsDlg').close(); setView('all', false); return toast('Demo data reset');
+    case 'today':
+      calYear = now.getFullYear(); calMonth = now.getMonth(); selectedDay = TODAY;
+      renderCal(); renderUpcoming(); renderCards(); return;
+    case 'prevMonth': if (--calMonth < 0) { calMonth = 11; calYear--; } return renderCal();
+    case 'nextMonth': if (++calMonth > 11) { calMonth = 0; calYear++; } return renderCal();
+    case 'clearDay': selectedDay = null; renderCal(); renderUpcoming(); return renderCards();
+    case 'clearSearch': query = ''; $('#search').value = ''; return renderCards();
+    case 'clear': query = ''; $('#search').value = ''; return setView('all');
   }
-
-  if (t.closest('#bellBtn')) {
-    const m = $('#notifMenu');
-    m.hidden = !m.hidden;
-    if (!m.hidden) { notifUnread = 0; renderNotif(); }
-    return;
-  }
-  if (!t.closest('#notifMenu')) $('#notifMenu').hidden = true;
 });
 
-$('#heroCta').addEventListener('click', () => setView($('#heroCta').dataset.view));
-$('#navNotif').addEventListener('click', () => { $('#notifMenu').hidden = false; notifUnread = 0; renderNotif(); $('#bellBtn').scrollIntoView({ behavior: 'smooth' }); });
-$('#navSettings').addEventListener('click', () => toast('Settings are coming soon'));
-$('#userBtn').addEventListener('click', () => toast('Signed in as Paul Abian (student)'));
-$('#todayBtn').addEventListener('click', () => {
-  calYear = 2026; calMonth = 10; selectedDay = iso(2026, 10, 4); renderAll();
-});
-$('#prevMonth').addEventListener('click', () => {
-  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal();
-});
-$('#nextMonth').addEventListener('click', () => {
-  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCal();
-});
+/* ---------- inputs ---------- */
 $('#search').addEventListener('input', (e) => { query = e.target.value; renderCards(); });
-$('#detail').addEventListener('click', (e) => { if (e.target.id === 'detail') $('#detail').close(); });
+$('#sort').addEventListener('change', (e) => { sort = e.target.value; renderCards(); });
+$('#setHero').addEventListener('change', (e) => { settings.hero = e.target.checked; persist(); applySettings(); });
+$('#setCompact').addEventListener('change', (e) => { settings.compact = e.target.checked; persist(); applySettings(); });
+$('#setRotate').addEventListener('change', (e) => { settings.rotate = e.target.checked; persist(); });
+document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
+$('#detail').addEventListener('close', () => { if (location.hash.startsWith('#item-')) history.replaceState(null, '', HASH[view] ? '#' + HASH[view] : location.pathname); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMenus();
+  if (e.key === '/' && !e.target.closest('input, textarea, select') && !document.querySelector('dialog[open]')) { e.preventDefault(); $('#search').focus(); }
+});
+window.addEventListener('hashchange', fromHash);
+window.addEventListener('resize', closeMenus);
 
-setInterval(() => { heroIndex = (heroIndex + 1) % heroSlides.length; renderHero(); }, 6000);
+let paused = false;
+$('#hero').addEventListener('mouseenter', () => (paused = true));
+$('#hero').addEventListener('mouseleave', () => (paused = false));
+setInterval(() => { if (settings.rotate && settings.hero && !paused && !document.hidden) { heroIndex = (heroIndex + 1) % SLIDES.length; renderHero(); } }, 6000);
 
-renderAll();
+fromHash();
 </script>
 </body>
 </html>
