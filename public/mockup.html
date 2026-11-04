@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CICI Announcements — Mockup</title>
+<style>
+:root{
+  --blue-900:#0b2e6b; --blue-700:#1450b4; --blue-600:#1d64d8; --blue-100:#e6efff; --blue-50:#f3f7ff;
+  --white:#ffffff; --text:#14213d; --muted:#5b6b8a; --border:#dbe5f7;
+  --event:#1d64d8; --exam:#0b2e6b; --activity:#3b82f6;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--blue-50);color:var(--text)}
+header{background:var(--blue-900);color:var(--white);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.2rem;font-weight:700}
+header .brand{display:flex;align-items:center;gap:10px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--white);color:var(--blue-900);display:grid;place-items:center;font-weight:800}
+.btn{font:inherit;border:1px solid var(--blue-600);background:var(--blue-600);color:var(--white);padding:9px 16px;border-radius:9px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--blue-900);border-color:var(--border);background:var(--white)}
+.btn.sm{padding:5px 11px;font-size:.85rem}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:1.6rem;color:var(--blue-900)}
+.stat span{color:var(--muted);font-size:.85rem}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.tabs{display:flex;gap:6px;background:var(--white);border:1px solid var(--border);padding:4px;border-radius:10px}
+.tab{border:0;background:transparent;padding:7px 14px;border-radius:7px;font:inherit;color:var(--muted);cursor:pointer;font-weight:600}
+.tab.on{background:var(--blue-600);color:var(--white)}
+input[type=search]{flex:1 1 220px;font:inherit;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--white);color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;border-top:4px solid var(--blue-600)}
+.card.event{border-top-color:var(--event)}
+.card.exam{border-top-color:var(--exam)}
+.card.activity{border-top-color:var(--activity)}
+.pill{align-self:flex-start;font-size:.75rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--blue-100);color:var(--blue-900)}
+.card h3{margin:0;font-size:1.05rem;color:var(--blue-900)}
+.card p{margin:0;color:var(--muted)}
+.meta{display:grid;gap:4px;font-size:.88rem;color:var(--text);margin-top:auto;padding-top:10px;border-top:1px solid var(--border)}
+.meta span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue-600);margin-right:8px;vertical-align:middle}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.badge-new{font-size:.75rem;background:var(--blue-600);color:var(--white);padding:2px 8px;border-radius:6px;font-weight:700}
+.section-title{margin:28px 0 12px;font-size:1rem;color:var(--blue-900);display:flex;align-items:center;gap:8px}
+.section-title::after{content:"";flex:1;height:1px;background:var(--border)}
+.countdown{font-weight:700;color:var(--blue-700)}
+footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:32px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">C</div>
+    <h1>CICI Announcements</h1>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn ghost sm">Notifications</button>
+    <button class="btn sm">+ New</button>
+  </div>
+</header>
+
+<main>
+  <section class="stats">
+    <div class="stat"><b>6</b><span>Upcoming events</span></div>
+    <div class="stat"><b>3</b><span>Exams this month</span></div>
+    <div class="stat"><b>8</b><span>Active activities</span></div>
+    <div class="stat"><b>2</b><span>Deadlines this week</span></div>
+  </section>
+
+  <section class="toolbar">
+    <div class="tabs" role="tablist">
+      <button class="tab on" role="tab">All</button>
+      <button class="tab" role="tab">Events</button>
+      <button class="tab" role="tab">Exams</button>
+      <button class="tab" role="tab">Activities</button>
+    </div>
+    <input type="search" placeholder="Search announcements…" aria-label="Search">
+  </section>
+
+  <h2 class="section-title">Events</h2>
+  <div class="grid">
+    <article class="card event">
+      <span class="pill">Event</span>
+      <h3>Annual Tech Fair</h3>
+      <p>Showcase of student projects, sponsor booths and live demos.</p>
+      <div class="meta">
+        <span>Sat, Nov 14 · 9:00 AM</span>
+        <span>Main Hall, Building A</span>
+      </div>
+    </article>
+    <article class="card event">
+      <span class="pill">Event</span>
+      <h3>Freshmen Orientation</h3>
+      <p>Welcome session, campus tour and club sign-ups.</p>
+      <div class="meta">
+        <span>Mon, Nov 9 · 8:30 AM</span>
+        <span>Auditorium</span>
+      </div>
+    </article>
+    <article class="card event">
+      <span class="pill">Event</span>
+      <h3>Guest Speaker: AI in Industry</h3>
+      <p>Talk and Q&amp;A with an industry panel.</p>
+      <div class="meta">
+        <span>Thu, Nov 20 · 2:00 PM</span>
+        <span>Room 203</span>
+      </div>
+    </article>
+  </div>
+
+  <h2 class="section-title">Exams</h2>
+  <div class="grid">
+    <article class="card exam">
+      <div class="row"><span class="pill">Exam</span><span class="countdown">in 5 days</span></div>
+      <h3>Data Structures — Midterm</h3>
+      <p>Covers chapters 1–6. Bring a valid ID and calculator.</p>
+      <div class="meta">
+        <span>Wed, Nov 9 · 10:00 AM</span>
+        <span>Room 105 · 90 minutes</span>
+      </div>
+    </article>
+    <article class="card exam">
+      <div class="row"><span class="pill">Exam</span><span class="countdown">in 12 days</span></div>
+      <h3>Networking Fundamentals — Quiz 3</h3>
+      <p>Online quiz via the learning portal. Open for 24 hours.</p>
+      <div class="meta">
+        <span>Sat, Nov 16 · 8:00 AM</span>
+        <span>Online</span>
+      </div>
+    </article>
+    <article class="card exam">
+      <div class="row"><span class="pill">Exam</span><span class="countdown">in 26 days</span></div>
+      <h3>Database Systems — Final</h3>
+      <p>Comprehensive exam. Seating chart posted one week before.</p>
+      <div class="meta">
+        <span>Mon, Dec 2 · 1:00 PM</span>
+        <span>Gym B</span>
+      </div>
+    </article>
+  </div>
+
+  <h2 class="section-title">Activities</h2>
+  <div class="grid">
+    <article class="card activity">
+      <div class="row"><span class="pill">Activity</span><span class="badge-new">NEW</span></div>
+      <h3>Hackathon Sign-up</h3>
+      <p>48-hour team build. Teams of 2–4. Prizes for top three.</p>
+      <div class="meta">
+        <span>Sign-up closes Nov 11</span>
+        <span>Innovation Lab</span>
+      </div>
+    </article>
+    <article class="card activity">
+      <div class="row"><span class="pill">Activity</span></div>
+      <h3>Volunteer Day: Community Clean-up</h3>
+      <p>Join us to clean and beautify the neighbourhood park.</p>
+      <div class="meta">
+        <span>Sun, Nov 15 · 7:30 AM</span>
+        <span>Meet at Gate 2</span>
+      </div>
+    </article>
+    <article class="card activity">
+      <div class="row"><span class="pill">Activity</span></div>
+      <h3>Weekly Book Club</h3>
+      <p>This week: "The Pragmatic Programmer", chapters 4–6.</p>
+      <div class="meta">
+        <span>Every Wed · 4:00 PM</span>
+        <span>Library, Room 2</span>
+      </div>
+    </article>
+  </div>
+
+  <footer>Mockup · White and blue palette · Static preview of the announcement board</footer>
+</main>
+</body>
+</html>
