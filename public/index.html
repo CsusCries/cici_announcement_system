@@ -12,7 +12,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 a{color:inherit;text-decoration:none}
 .app{display:grid;grid-template-columns:240px 1fr 300px;min-height:100vh}
 /* sidebar */
-.side{background:linear-gradient(180deg,#f7f9ff,#eef3ff);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;gap:6px}
+.side{background:linear-gradient(180deg,#f7f9ff,#eef3ff);border-right:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto;align-self:start}
 .logo{display:flex;align-items:center;gap:10px;padding:0 8px 20px}
 .logo .mark{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fff 0 22%,var(--blue) 23% 100%);box-shadow:0 0 0 6px #dbe7ff inset}
 .logo b{display:block;font-size:26px;color:var(--blue);letter-spacing:.5px;line-height:1}
@@ -82,7 +82,7 @@ a{color:inherit;text-decoration:none}
 .card .link{color:var(--blue);font-weight:600;margin:0 14px 14px;padding:0;background:none;border:0;text-align:left}
 .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:32px;background:var(--white);border:1px dashed var(--border);border-radius:16px}
 /* right */
-.rail{padding:24px 22px 24px 0;display:flex;flex-direction:column;gap:16px}
+.rail{padding:24px 22px 24px 0;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh;overflow-y:auto;align-self:start}
 .panel{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:18px}
 .panel header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .panel header b{font-size:16px;display:flex;gap:10px;align-items:center}
@@ -120,7 +120,7 @@ dialog .acts{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
 .btn.primary{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--blue-d);color:#fff;padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media (max-width:1100px){.app{grid-template-columns:1fr}.side{flex-direction:row;overflow-x:auto;position:sticky;top:0;z-index:2}.logo{padding:0 12px 0 0}.nav{display:flex}.user,.nav hr{display:none}.rail{padding:0 24px 24px}.cards,.quick{grid-template-columns:1fr}footer{grid-column:auto}}
+@media (max-width:1100px){.app{grid-template-columns:1fr}.side{flex-direction:row;overflow-x:auto;position:sticky;top:0;z-index:2;height:auto}.logo{padding:0 12px 0 0}.nav{display:flex}.user,.nav hr{display:none}.rail{padding:0 24px 24px;position:static;height:auto}.cards,.quick{grid-template-columns:1fr}footer{grid-column:auto}}
 @media (max-width:600px){.main{padding:16px}.hero h2{font-size:28px}.hero .bldg,.hero .mega{display:none}}
 </style>
 </head>
