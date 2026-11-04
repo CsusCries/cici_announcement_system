@@ -7,7 +7,7 @@ export const live = Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
 
 let sb = null;
 if (live) {
-  // supabase-js 2.45.4 browser build, bundled in public/vendor/supabase (MIT licence).
+  // supabase-js 2.118.0 browser build, bundled in public/vendor/supabase (MIT licence).
   if (!window.supabase) {
     await new Promise((resolve, reject) => {
       const s = Object.assign(document.createElement('script'), { src: new URL('../vendor/supabase/supabase.js', import.meta.url).href });

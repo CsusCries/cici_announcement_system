@@ -22,7 +22,7 @@ Email confirmation is on by default: new users must click the link in their emai
 
 ## 3. Connect the site
 
-In **Project Settings → API**, copy the **Project URL** and the **anon public** key into [`public/config.js`](../public/config.js):
+In **Project Settings → API**, copy the **Project URL** and the **publishable** key (`sb_publishable_…`, or the legacy anon public key) into [`public/config.js`](../public/config.js):
 
 ```js
 window.CICI_CONFIG = {
@@ -31,7 +31,7 @@ window.CICI_CONFIG = {
 };
 ```
 
-The anon key is designed to be public. **Never** paste the `service_role` key into the site.
+The publishable key is designed to be public. **Never** paste the secret key (`sb_secret_…`) or `service_role` key into the site.
 
 Commit and push; Vercel redeploys automatically.
 
