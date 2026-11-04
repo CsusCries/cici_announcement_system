@@ -24,8 +24,8 @@ body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;b
 h2{margin:0 0 4px;font-size:22px}
 .sub{color:var(--muted);margin:0 0 8px}
 label{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted);margin-top:14px}
-input{font:inherit;font-size:16px;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 12px;width:100%}
-input:focus{outline:2px solid var(--blue-600);outline-offset:1px;border-color:transparent}
+input,select{font:inherit;font-size:16px;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 12px;width:100%}
+input:focus,select:focus{outline:2px solid var(--blue-600);outline-offset:1px;border-color:transparent}
 .btn{width:100%;margin-top:20px;border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:700;padding:12px;border-radius:10px;cursor:pointer}
 .btn:disabled{opacity:.6;cursor:wait}
 .link{background:none;border:0;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;padding:0}
@@ -76,6 +76,11 @@ form[hidden]{display:none}
       <p class="sub">New accounts start as students. An admin can change your role.</p>
       <label>Full name<input name="name" autocomplete="name" maxlength="60" required></label>
       <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Year level<select name="year" required>
+        <option value="">Choose…</option>
+        <option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option>
+        <option value="none">Not a student (faculty / staff)</option>
+      </select></label>
       <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Create account</button>
     </form>
@@ -135,12 +140,13 @@ $('#fIn').addEventListener('submit', (e) => {
 
 $('#fUp').addEventListener('submit', (e) => {
   e.preventDefault(); const f = e.target.elements;
-  const name = f.name.value.trim(), email = f.email.value.trim(), password = f.password.value;
+  const name = f.name.value.trim(), email = f.email.value.trim(), password = f.password.value, year = f.year.value;
   if (!name) return msg('Please enter your name.');
   if (!emailOk(email)) return msg('Please enter a valid email.');
+  if (!year) return msg('Please choose your year level.');
   if (password.length < 8) return msg('Password must be at least 8 characters.');
   busy(e.target, async () => {
-    const { needsConfirm } = await api.signUp(name, email, password);
+    const { needsConfirm } = await api.signUp(name, email, password, year === 'none' ? '' : year);
     if (needsConfirm) { show('in'); msg('Account created. Check your email to confirm it, then sign in.', 'ok'); }
     else await goIn();
   });

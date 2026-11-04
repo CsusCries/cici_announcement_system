@@ -209,7 +209,7 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
         <div class="panel"><h2>Coming up next 14 days <button class="linkbtn" data-go="cal">Calendar →</button></h2><div class="list" id="soon"></div></div>
         <div class="panel"><h2>Recent activity <button class="linkbtn" data-act="clearLog">Clear</button></h2><div class="list log" id="log"></div></div>
       </div>
-      <div class="panel" style="margin-top:16px"><h2>Most sign-ups</h2><div class="list" id="popular"></div></div>
+      <div class="panel" style="margin-top:16px"><h2>Most sign-ups <span class="sub" style="font-weight:400;font-size:13px">tap one to see who</span></h2><div class="list" id="popular"></div></div>
     </section>
 
     <!-- ANNOUNCEMENTS -->
@@ -265,10 +265,11 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
       <div class="toolbar">
         <label class="search"><span aria-hidden="true">🔍</span><input id="uq" type="search" placeholder="Search name or email…" aria-label="Search users"></label>
         <select id="uRole" aria-label="Role"><option value="">All roles</option><option>Student</option><option>Faculty</option><option>Admin</option></select>
+        <select id="uYear" aria-label="Year level"><option value="">All years</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option value="none">Year not set</option></select>
       </div>
       <div class="tablebox">
         <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Email</th><th>Year</th><th>Role</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
           <tbody id="urows"></tbody>
         </table>
       </div>
@@ -289,6 +290,18 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
     </section>
   </main>
 </div>
+
+<!-- sign-up list -->
+<dialog id="suDlg">
+  <div class="dbox">
+    <h3 id="suTitle">Sign-ups</h3>
+    <p class="sub" id="suSub" style="margin:0 0 10px"></p>
+    <div class="toolbar"><label class="search"><span aria-hidden="true">🔍</span><input id="suQ" type="search" placeholder="Search name or email…" aria-label="Search sign-ups"></label>
+      <select id="suYear" aria-label="Year level"><option value="">All years</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option></select></div>
+    <div class="list" id="suList" style="max-height:50vh;overflow:auto"></div>
+    <div class="dacts"><button class="btn" data-act="suCsv">Download CSV</button><span class="sp"></span><button class="btn primary" data-close>Close</button></div>
+  </div>
+</dialog>
 
 <!-- editor -->
 <dialog id="editDlg">
@@ -446,7 +459,7 @@ function renderDash() {
   const top = items.filter((a) => a.type !== 'exam').sort((a, b) => signups(b) - signups(a)).slice(0, 5);
   const max = Math.max(1, ...top.map(signups));
   $('#popular').innerHTML = top.length ? top.map((a) => `
-    <button class="li" data-edit="${a.id}"><span class="pill ${a.type}">${TYPE[a.type]}</span>
+    <button class="li" data-signups="${a.id}"><span class="pill ${a.type}">${TYPE[a.type]}</span>
       <span><b>${esc(a.title)}</b><span class="bar" style="width:min(260px,100%)"><i style="width:${(signups(a) / max) * 100}%"></i></span></span><b>${signups(a)}</b></button>`).join('')
     : '<p class="empty">No events or activities yet.</p>';
 }
@@ -469,7 +482,7 @@ function renderTable() {
       <td data-l="Type"><span class="pill ${a.type}">${TYPE[a.type]}</span></td>
       <td data-l="Date">${range(a)}</td>
       <td data-l="Status"><span class="st ${s}">${STATUS[s]}</span></td>
-      <td data-l="Sign-ups">${a.type === 'exam' ? `<span class="sub">${signups(a)} reminders</span>` : signups(a)}</td>
+      <td data-l="Sign-ups"><button class="linkbtn" data-signups="${a.id}" title="See who signed up">${signups(a)}${a.type === 'exam' ? ' reminders' : ''} →</button></td>
       <td><div class="acts">
         <button class="iconbtn" data-act="edit" data-id="${a.id}" title="Edit" aria-label="Edit">${icon('edit')}</button>
         <button class="iconbtn ${a.pinned ? 'on' : ''}" data-act="pin" data-id="${a.id}" title="${a.pinned ? 'Unpin' : 'Pin'}" aria-label="${a.pinned ? 'Unpin' : 'Pin'}" aria-pressed="${!!a.pinned}">${icon('pin')}</button>
@@ -501,19 +514,20 @@ function renderCal() {
 }
 
 function renderUsers() {
-  const q = $('#uq').value.trim().toLowerCase(), r = $('#uRole').value;
-  const list = users.filter((u) => (!r || roleLabel(u.role) === r) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
+  const q = $('#uq').value.trim().toLowerCase(), r = $('#uRole').value, y = $('#uYear').value;
+  const list = users.filter((u) => (!r || roleLabel(u.role) === r) && (!y || (y === 'none' ? u.role === 'student' && !u.year : u.year === y)) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
   $('#urows').innerHTML = list.length ? list.map((u) => {
     const self = u.id === me.id;
     return `<tr>
     <td data-l="Name"><span class="user"><span class="ua">${esc(initials(u.name))}</span><b>${esc(u.name)}${self ? ' (you)' : ''}</b></span></td>
     <td data-l="Email">${esc(u.email)}</td>
+    <td data-l="Year">${u.role === 'student' ? esc(u.year || 'Not set') : '<span class="sub">—</span>'}</td>
     <td data-l="Role"><select data-role="${esc(u.id)}" aria-label="Role for ${esc(u.name)}" ${self ? 'disabled title="You can’t change your own role"' : ''}>${['student', 'faculty', 'admin'].map((x) => `<option value="${x}" ${x === u.role ? 'selected' : ''}>${roleLabel(x)}</option>`).join('')}</select></td>
     <td data-l="Status"><span class="st ${u.active ? 'published' : 'draft'}">${u.active ? 'Active' : 'Suspended'}</span></td>
     <td><div class="acts">
       ${self ? '' : `<button class="iconbtn" data-act="uactive" data-id="${esc(u.id)}" title="${u.active ? 'Suspend' : 'Reactivate'}" aria-label="${u.active ? 'Suspend' : 'Reactivate'} ${esc(u.name)}">${icon('power')}</button>`}
     </div></td></tr>`;
-  }).join('') : '<tr><td colspan="5"><p class="empty">No users match.</p></td></tr>';
+  }).join('') : '<tr><td colspan="6"><p class="empty">No users match.</p></td></tr>';
 }
 
 function renderSettings() { $('#sOrg').value = cfg.org; $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
@@ -564,6 +578,45 @@ $('#form').addEventListener('submit', async (e) => {
   finally { btn.disabled = false; }
 });
 
+/* ---------- sign-up list ---------- */
+let suItem = null, suPeople = [], suSample = 0;
+const VERB = { event: 'registered', activity: 'joined', exam: 'set a reminder' };
+async function openSignups(id) {
+  suItem = byId(id); if (!suItem) return;
+  $('#suTitle').textContent = suItem.title;
+  $('#suSub').textContent = 'Loading…'; $('#suList').innerHTML = ''; $('#suQ').value = ''; $('#suYear').value = '';
+  $('#suDlg').showModal();
+  try { ({ people: suPeople, sample: suSample } = await api.listSignups(suItem.id)); }
+  catch (e) { suPeople = []; suSample = 0; $('#suSub').textContent = 'Couldn’t load: ' + e.message; return; }
+  renderSignups();
+}
+function suFiltered() {
+  const q = $('#suQ').value.trim().toLowerCase(), y = $('#suYear').value;
+  return suPeople.filter((p) => (!y || p.year === y) && (!q || (p.name + ' ' + p.email).toLowerCase().includes(q)));
+}
+function renderSignups() {
+  const list = suFiltered();
+  const byYear = {}; suPeople.forEach((p) => { const k = p.year || 'No year'; byYear[k] = (byYear[k] || 0) + 1; });
+  $('#suSub').textContent = `${suPeople.length} ${suPeople.length === 1 ? 'person has' : 'people have'} ${VERB[suItem.type]} · ${range(suItem)}`
+    + (Object.keys(byYear).length ? ' · ' + Object.entries(byYear).map(([k, n]) => `${k}: ${n}`).join(', ') : '')
+    + (suSample ? ` · plus ${suSample} sample sign-ups (demo data, no names)` : '');
+  $('#suList').innerHTML = list.length ? list.map((p, i) => `
+    <div class="li"><span class="ua">${esc(initials(p.name))}</span>
+      <span><b>${esc(p.name || '(no name)')}</b><small>${esc(p.email)}${p.year ? ' · ' + esc(p.year) : ''}</small></span>
+      <small>${p.at ? new Date(p.at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : ''}</small></div>`).join('')
+    : `<p class="empty">${suPeople.length ? 'No one matches.' : 'No one has signed up yet.'}</p>`;
+}
+function signupsCsv() {
+  const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = [['Name', 'Email', 'Year level', 'Signed up']].concat(suFiltered().map((p) => [p.name, p.email, p.year, p.at ? new Date(p.at).toISOString() : '']));
+  const url = URL.createObjectURL(new Blob([rows.map((r) => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv' }));
+  const link = Object.assign(document.createElement('a'), { href: url, download: suItem.title.replace(/[^\w]+/g, '-') + '-signups.csv' });
+  document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('CSV downloaded');
+}
+$('#suQ').addEventListener('input', renderSignups);
+$('#suYear').addEventListener('change', (e) => { e.stopPropagation(); renderSignups(); });
+
 /* ---------- CSV export ---------- */
 function exportCsv() {
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -580,6 +633,7 @@ document.addEventListener('click', async (e) => {
   const t = e.target;
   if (t.closest('[data-close]')) return t.closest('dialog').close();
   const g = t.closest('[data-go]'); if (g) return go(g.dataset.go);
+  const su = t.closest('[data-signups]'); if (su) return openSignups(su.dataset.signups);
   const ed = t.closest('[data-edit]'); if (ed) return openEditor(byId(ed.dataset.edit));
   const nd = t.closest('[data-newon]'); if (nd) return openEditor(null, { date: nd.dataset.newon });
   const st = t.closest('[data-stat]');
@@ -627,6 +681,7 @@ document.addEventListener('click', async (e) => {
     }
     case 'bulkClear': selected.clear(); return renderTable();
     case 'export': return exportCsv();
+    case 'suCsv': return signupsCsv();
     case 'prev': if (--calM < 0) { calM = 11; calY--; } return renderCal();
     case 'next': if (++calM > 11) { calM = 0; calY++; } return renderCal();
     case 'thisMonth': calY = now.getFullYear(); calM = now.getMonth(); return renderCal();
@@ -654,7 +709,7 @@ document.addEventListener('change', async (e) => {
   if (t.id === 'sAud') { cfg.audience = t.value; saveCfg(); return toast('Default audience saved'); }
   if (t.id === 'sDraft') { cfg.draftFirst = t.checked; saveCfg(); return toast('Saved'); }
   if (t.id === 'sOrg') { cfg.org = t.value.trim() || 'CICI'; saveCfg(); render(); return toast('Organization name saved'); }
-  if (['fType', 'fStatus', 'fSort', 'uRole'].includes(t.id)) render();
+  if (['fType', 'fStatus', 'fSort', 'uRole', 'uYear'].includes(t.id)) render();
 });
 ['q', 'uq'].forEach((id) => $('#' + id).addEventListener('input', render));
 document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));

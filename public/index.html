@@ -209,6 +209,8 @@ dialog .acts .sp{flex:1}
 .setrow input{width:20px;height:20px}
 #profileMenu{position:fixed;top:auto;right:auto;width:240px}
 .compact .img{display:none}
+.yearbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--blue-100);color:var(--blue-d);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-weight:600}
+.yearbar .btn{padding:7px 12px;font-size:13px}
 .nohero .hero{display:none}
 .nohero .quick{margin-top:20px}
 @media (max-width:1100px){.avbtn{display:grid;place-items:center}}
@@ -277,6 +279,7 @@ dialog .acts .sp{flex:1}
       <button data-view="saved">★ Saved</button>
       <button data-view="mine">✓ My list</button>
     </div>
+    <div class="yearbar" id="yearBar" hidden><span>📌 Set your year level so you only see announcements meant for you.</span><button class="btn primary" data-act="profile-edit">Set year level</button></div>
     <div class="filters" id="filters" hidden></div>
     <section class="cards" id="cards"><div class="empty">Loading announcements…</div></section>
 
@@ -303,11 +306,24 @@ dialog .acts .sp{flex:1}
   <button class="ni" data-view="mine"><b>✓ My list</b><small>Events and activities you joined</small></button>
   <button class="ni" data-view="saved"><b>★ Saved</b><small>Announcements you bookmarked</small></button>
   <a class="ni" href="admin.html" id="adminLink" hidden style="color:inherit"><b>🛠 Admin panel</b><small>Manage announcements and users</small></a>
+  <button class="ni" data-act="profile-edit"><b>👤 My profile</b><small>Name, year level, password</small></button>
   <button class="ni" data-act="settings"><b>⚙ Settings</b><small>Display preferences</small></button>
   <button class="ni" data-act="signout"><b>Sign out</b><small id="meEmail"></small></button>
 </div>
 
 <dialog id="detail"><div class="box" id="detailBody"></div></dialog>
+
+<dialog id="profileDlg">
+  <form class="box" id="profileForm" novalidate>
+    <h3>My profile</h3>
+    <p class="mine" id="pfEmail"></p>
+    <label class="fld">Full name<input name="name" maxlength="60" autocomplete="name" required></label>
+    <label class="fld" id="pfYearRow">Year level<select name="year"><option value="">Not set (see all years)</option></select></label>
+    <label class="fld" id="pfPwRow">New password <span class="mine">(leave blank to keep)</span><input name="password" type="password" minlength="8" autocomplete="new-password"></label>
+    <div class="err" id="pfErr" role="alert"></div>
+    <div class="acts"><span class="sp"></span><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary" id="pfSave">Save</button></div>
+  </form>
+</dialog>
 
 <dialog id="settingsDlg">
   <div class="box">
@@ -323,7 +339,7 @@ dialog .acts .sp{flex:1}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { api, isStaff, roleLabel, initials } from './js/data.js';
+import { api, isStaff, roleLabel, initials, visibleTo, YEARS } from './js/data.js';
 
 /* ---------- sign-in gate ---------- */
 const me = await api.requireUser();
@@ -355,7 +371,8 @@ let items = [], reg = new Set(), saved = new Set();
 async function load() {
   try {
     [items, reg, saved] = await Promise.all([api.listAnnouncements(), api.mySignups(), api.mySaves()]);
-    items = items.filter((a) => a.status !== 'draft'); // staff see drafts only in the admin panel
+    // Drafts live in the admin panel; students only get posts for their audience.
+    items = items.filter((a) => a.status !== 'draft' && visibleTo(me, a));
   } catch (e) {
     $('#cards').innerHTML = `<div class="empty">Couldn’t load announcements: ${esc(e.message)}</div>`;
     throw e;
@@ -395,9 +412,13 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
 function closeMenus() { $('#notifMenu').hidden = true; $('#profileMenu').hidden = true; }
 
 /* ---------- who's signed in ---------- */
-$('#meName').textContent = me.name;
-$('#meRole').textContent = roleLabel(me.role);
-$('#meInit').textContent = $('#meInit2').textContent = initials(me.name);
+function showMe() {
+  $('#meName').textContent = me.name;
+  $('#meRole').textContent = me.role === 'student' && me.year ? `Student · ${me.year}` : roleLabel(me.role);
+  $('#meInit').textContent = $('#meInit2').textContent = initials(me.name);
+  $('#yearBar').hidden = !(me.role === 'student' && !me.year);
+}
+showMe();
 $('#meEmail').textContent = me.email;
 $('#adminLink').hidden = $('#newBtn').hidden = !isStaff(me);
 if (!api.live) $('#modeNote').textContent = 'Demo mode · data stays in this browser';
@@ -624,6 +645,7 @@ document.addEventListener('click', async (e) => {
     case 'readAll': notifications().forEach((x) => read.add(x.id)); persistPrefs(); renderNotif(); return toast('All caught up');
     case 'profile': { const m = $('#profileMenu'); const show = m.hidden; closeMenus(); if (show) placeMenu(m, btn); return; }
     case 'settings': closeMenus(); applySettings(); return $('#settingsDlg').showModal();
+    case 'profile-edit': closeMenus(); return openProfile();
     case 'signout': closeMenus(); await api.signOut(); return location.replace('login.html?msg=signedout');
     case 'reset':
       if (!confirm('Reset display settings and notification read status on this device?')) return;
@@ -638,6 +660,36 @@ document.addEventListener('click', async (e) => {
     case 'clearSearch': query = ''; $('#search').value = ''; return renderCards();
     case 'clear': query = ''; $('#search').value = ''; return setView('all');
   }
+});
+
+/* ---------- profile ---------- */
+$('#profileForm').elements.year.insertAdjacentHTML('beforeend', YEARS.map((y) => `<option>${y}</option>`).join(''));
+function openProfile() {
+  const f = $('#profileForm');
+  f.reset(); $('#pfErr').textContent = '';
+  f.elements.name.value = me.name; f.elements.year.value = me.year || '';
+  $('#pfEmail').textContent = `${me.email} · ${roleLabel(me.role)}`;
+  $('#pfYearRow').hidden = me.role !== 'student';
+  $('#pfPwRow').hidden = !api.live;
+  $('#profileDlg').showModal();
+}
+$('#profileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target.elements, name = f.name.value.trim(), year = f.year.value, pw = f.password.value;
+  if (!name) return ($('#pfErr').textContent = 'Please enter your name.');
+  if (pw && pw.length < 8) return ($('#pfErr').textContent = 'Password must be at least 8 characters.');
+  const btn = $('#pfSave'); btn.disabled = true;
+  try {
+    const patch = { name };
+    if (me.role === 'student') patch.year = year;
+    const yearChanged = 'year' in patch && patch.year !== me.year;
+    await api.updateMyProfile(patch);
+    if (pw) await api.updatePassword(pw);
+    $('#profileDlg').close(); showMe();
+    if (yearChanged) { await load(); renderAll(); }
+    toast(pw ? 'Profile and password updated' : 'Profile updated');
+  } catch (err) { $('#pfErr').textContent = 'Couldn’t save: ' + err.message; }
+  finally { btn.disabled = false; }
 });
 
 /* ---------- inputs ---------- */

@@ -38,7 +38,18 @@ const toRow = (a) => {
   for (const [k, col] of Object.entries(map)) if (k in a) row[col] = k === 'end' ? (a.end || null) : a[k];
   return row;
 };
-const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role, active: p.active });
+const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role, active: p.active, year: p.year_level || '' });
+
+export const YEARS = ['1st year', '2nd year', '3rd year', '4th year'];
+// Who should see an announcement: staff see everything; students see "All students"
+// posts plus their own year (all years if they haven't set one); "Faculty" posts are staff-only.
+export const visibleTo = (u, a) => {
+  if (isStaff(u)) return true;
+  const aud = a.audience || 'All students';
+  if (aud === 'All students') return true;
+  if (aud === 'Faculty') return false;
+  return !u?.year || aud === u.year;
+};
 
 /* ---------------- demo (localStorage) ---------------- */
 const local = {
@@ -57,9 +68,9 @@ const DEMO_ITEMS = [
   { id: 7, type: 'event', title: 'Career Fair', date: '2026-12-03', where: 'Gym B', body: 'Meet employers and bring printed CVs.', status: 'draft', audience: '4th year', signups: 0 },
 ];
 const DEMO_USERS = [
-  { id: 'u1', name: 'Paul Abian', email: 'paul.abian@student.cici.edu', role: 'student', active: true },
-  { id: 'u2', name: 'Maria Santos', email: 'maria.santos@student.cici.edu', role: 'student', active: true },
-  { id: 'u3', name: 'Ana Cruz', email: 'ana.cruz@student.cici.edu', role: 'student', active: false },
+  { id: 'u1', name: 'Paul Abian', email: 'paul.abian@student.cici.edu', role: 'student', active: true, year: '2nd year' },
+  { id: 'u2', name: 'Maria Santos', email: 'maria.santos@student.cici.edu', role: 'student', active: true, year: '1st year' },
+  { id: 'u3', name: 'Ana Cruz', email: 'ana.cruz@student.cici.edu', role: 'student', active: false, year: '3rd year' },
   { id: 'u4', name: 'Prof. L. Garcia', email: 'l.garcia@cici.edu', role: 'faculty', active: true },
   { id: 'u5', name: 'Demo Admin', email: 'admin@cici.edu', role: 'admin', active: true },
 ];
@@ -109,15 +120,15 @@ export const api = {
     if (me && !me.active) { await this.signOut(); throw new Error('This account is suspended. Contact an administrator.'); }
   },
 
-  async signUp(name, email, password) {
+  async signUp(name, email, password, year = '') {
     if (!live) {
       const users = demoUsers();
       if (users.some((x) => x.email === email.toLowerCase())) throw new Error('That email already has an account.');
-      const u = { id: 'u' + Date.now(), name, email: email.toLowerCase(), role: 'student', active: true };
+      const u = { id: 'u' + Date.now(), name, email: email.toLowerCase(), role: 'student', active: true, year };
       users.push(u); local.set('demoUsers', users); local.set('session', { id: u.id });
       return { needsConfirm: false };
     }
-    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: base() + 'login.html' } });
+    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name, year_level: year }, emailRedirectTo: base() + 'login.html' } });
     fail(error);
     return { needsConfirm: !data.session };
   },
@@ -135,6 +146,7 @@ export const api = {
   },
 
   async updatePassword(password) {
+    if (!live) throw new Error('Passwords need Supabase. In demo mode no password is checked.');
     const { error } = await sb.auth.updateUser({ password });
     fail(error);
   },
@@ -236,8 +248,32 @@ export const api = {
     if ('role' in patch) row.role = patch.role;
     if ('active' in patch) row.active = patch.active;
     if ('name' in patch) row.full_name = patch.name;
-    const { error } = await sb.from('profiles').update(row).eq('id', id);
+    if ('year' in patch) row.year_level = patch.year || null;
+    const { data, error } = await sb.from('profiles').update(row).eq('id', id).select('id');
     fail(error);
+    if (!data.length) throw new Error('You don’t have permission to change this user.');
+  },
+
+  // Change your own name / year level.
+  async updateMyProfile(patch) {
+    await this.updateProfile(meCache.id, patch);
+    Object.assign(meCache, patch);
+    return meCache;
+  },
+
+  // Staff only: who signed up for an announcement.
+  async listSignups(announcementId) {
+    if (!live) {
+      const users = demoUsers(), out = [];
+      users.forEach((u) => { if (local.get(`reg.${u.id}`, []).includes(announcementId)) out.push({ name: u.name, email: u.email, year: u.year || '', at: null }); });
+      const sample = (demoItems().find((a) => a.id === announcementId) || {}).signups || 0;
+      return { people: out, sample };
+    }
+    const { data, error } = await sb.from('signups')
+      .select('created_at, profiles(full_name, email, year_level)')
+      .eq('announcement_id', announcementId).order('created_at');
+    fail(error);
+    return { people: data.map((r) => ({ name: r.profiles?.full_name || '', email: r.profiles?.email || '', year: r.profiles?.year_level || '', at: Date.parse(r.created_at) })), sample: 0 };
   },
 
   /* ---- admin activity log ---- */
