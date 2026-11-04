@@ -1,0 +1,36 @@
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#6b7280;--border:#e5e7eb;--accent:#4f46e5;--high:#dc2626;--low:#9ca3af;--normal:#2563eb}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#181c2e;--text:#e6e8f0;--muted:#9aa1b5;--border:#2a3048}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 24px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+.topbar h1{font-size:1.25rem;margin:0}
+.container{max-width:860px;margin:0 auto;padding:24px 16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar input{flex:1 1 220px}
+input,select,textarea{font:inherit;color:inherit;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;width:100%}
+.toolbar select{width:auto}
+.btn{font:inherit;border:1px solid var(--border);background:var(--card);color:inherit;padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:hover{filter:brightness(.95)}
+.muted{color:var(--muted);font-size:.9rem}
+.list{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--normal);border-radius:10px;padding:16px}
+.card.high{border-left-color:var(--high)}.card.low{border-left-color:var(--low)}
+.card.pinned{box-shadow:0 0 0 2px var(--accent) inset}
+.card h3{margin:0 0 4px;font-size:1.05rem}
+.card p{margin:8px 0;white-space:pre-wrap}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
+.tag{padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--border)}
+.tag.Urgent{color:var(--high);border-color:var(--high)}
+.card-actions{display:flex;gap:6px;margin-top:8px}
+.card-actions .btn{padding:4px 10px;font-size:.85rem}
+.empty{text-align:center;color:var(--muted);padding:48px 0}
+dialog{border:none;border-radius:12px;padding:0;width:min(520px,calc(100% - 32px));background:var(--card);color:var(--text)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+form{padding:20px;display:grid;gap:12px}
+form h2{margin:0}
+label{display:grid;gap:4px;font-size:.9rem}
+label.check{display:flex;align-items:center;gap:8px}
+label.check input{width:auto}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;justify-content:flex-end;gap:8px}
