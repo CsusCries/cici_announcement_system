@@ -123,7 +123,7 @@ export const api = {
     if (!session) return (meCache = null);
     const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
     fail(error);
-    if (!data) throw new Error('Your profile is missing. Make sure supabase/schema.sql was run, then sign up again.');
+    if (!data) throw new Error('Your account isn’t fully set up yet (no profile). Please ask an administrator to fix your account.');
     return (meCache = fromProfile(data));
   },
 
@@ -147,9 +147,28 @@ export const api = {
       local.set('session', { id: u.id }); return;
     }
     const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      // Turn Supabase's messages into ones people can act on.
+      const m = (error.message || '').toLowerCase();
+      if (m.includes('not confirmed')) {
+        const e = new Error('Your email isn’t confirmed yet. Open the confirmation link we emailed you (check spam too), or tap “Resend confirmation email” below.');
+        e.code = 'email_not_confirmed';
+        throw e;
+      }
+      if (m.includes('invalid login credentials')) throw new Error('Wrong email or password. If you forgot your password, use “Forgot password?”.');
+      fail(error);
+    }
+    let me = null;
+    try { me = await this.currentUser(); }
+    catch (e) { await this.signOut(); throw e; }  // don't leave a half-signed-in session behind
+    if (!me) { await this.signOut(); throw new Error('Sign-in failed. Please try again.'); }
+    if (!me.active) { await this.signOut(); throw new Error('This account is suspended. Contact an administrator.'); }
+  },
+
+  async resendConfirmation(email) {
+    if (!live) throw new Error('Not needed in demo mode.');
+    const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: base() + 'login.html' } });
     fail(error);
-    const me = await this.currentUser();
-    if (me && !me.active) { await this.signOut(); throw new Error('This account is suspended. Contact an administrator.'); }
   },
 
   async signUp(name, email, password, year = '') {
