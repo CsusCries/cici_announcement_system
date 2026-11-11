@@ -26,6 +26,12 @@ Then open http://localhost:8000/login.html. (Pages use ES modules, so open them 
 
 Admins change the site name, subtitle, logo, main colour, sign-in page text, home banner slides (up to 5) and footer in **Admin → Settings → Site content**. It is stored in the `site_settings` table (migration `004_site_settings.sql`); everyone can read it, only admins can change it.
 
+## Password recovery
+
+- **By email:** *Forgot password?* on the sign-in page emails a link; it opens a "choose a new password" form (expired links are detected). Needs the Supabase redirect URL `…/login.html` allowed and working email delivery.
+- **By an admin (no email):** Admin → Users → key button sets a temporary password and shows it once; the user then changes it in *My profile*. Uses the `admin_set_password` database function (migration 005), which only admins can run.
+- Password boxes have a show/hide (eye) button. Stored passwords can't be viewed by anyone, admins included.
+
 ## Mobile app
 
 On phones the pages switch to an app layout (bottom tab bar, bottom sheets, larger tap targets). The site is installable: Android/Chrome shows **Install app** (in the profile menu or admin Settings); on iPhone/iPad use Share → **Add to Home Screen**. A service worker (`public/sw.js`) keeps a copy of the app files so it still opens offline (network first, so online users always get the latest version).
@@ -42,3 +48,4 @@ On phones the pages switch to an app layout (bottom tab bar, bottom sheets, larg
   - `002_year_level.sql`: student year levels
   - `003_photos.sql`: announcement photos (storage bucket `announcement-images`)
   - `004_site_settings.sql`: editable site content
+  - `005_admin_password_reset.sql`: admins can set a temporary password for a user

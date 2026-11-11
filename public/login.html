@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="js/pwa.js" defer></script>
+<script src="js/pw-toggle.js" defer></script>
 <title>Sign in · CICI</title>
 <style>
 :root{--blue:#1d4ed8;--blue-d:#1e3a8a;--blue-600:#2563eb;--blue-100:#e0eaff;--blue-50:#f2f6ff;--text:#0f1c3f;--muted:#5b6b84;--border:#e2e8f0;--red:#c81e1e;--green:#0f6b55}
@@ -100,12 +101,15 @@ form[hidden]{display:none}
       <p class="sub">We'll email you a link to choose a new password.</p>
       <label>Email<input name="email" type="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email" required></label>
       <button class="btn" type="submit">Send reset link</button>
+      <p class="sub" style="margin-top:14px">No email after a few minutes? Check your spam folder, or ask an administrator to reset your password for you.</p>
       <div class="row"><button type="button" class="link" data-tab="in">Back to sign in</button></div>
     </form>
 
     <form id="fNew" novalidate hidden>
       <h2>Choose a new password</h2>
+      <p class="sub">At least 8 characters.</p>
       <label>New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Type it again<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Save password</button>
     </form>
 
@@ -189,17 +193,43 @@ $('#fReset').addEventListener('submit', (e) => {
 $('#fNew').addEventListener('submit', (e) => {
   e.preventDefault(); const pw = e.target.elements.password.value;
   if (pw.length < 8) return msg('Password must be at least 8 characters.');
-  busy(e.target, async () => { await api.updatePassword(pw); msg('Password updated. Signing you in…', 'ok'); setTimeout(goIn, 800); });
+  if (pw !== e.target.elements.password2.value) return msg('The two passwords don’t match.');
+  busy(e.target, async () => {
+    try { await api.updatePassword(pw); }
+    catch (err) {
+      if (/session|expired|jwt|auth/i.test(err.message)) throw new Error('This reset link has expired. Request a new one with “Forgot password?”.');
+      if (/different from the old|same password/i.test(err.message)) throw new Error('Choose a password different from your old one.');
+      throw err;
+    }
+    history.replaceState(null, '', 'login.html');
+    msg('Password updated. Signing you in…', 'ok'); setTimeout(goIn, 800);
+  });
 });
 
+// ---- Opening a reset link from the email ----
+// The link brings the user back here with ?reset=1 (and a one-time token Supabase reads from the URL).
+const hashParams = new URLSearchParams(location.hash.slice(1));
+const isRecovery = params.get('reset') === '1' || hashParams.get('type') === 'recovery';
+const linkError = hashParams.get('error_description') || params.get('error_description');
 api.onRecovery(() => show('new'));
+if (isRecovery) {
+  if (linkError) {
+    show('reset');
+    msg(/expired|invalid/i.test(linkError) ? 'This reset link has expired or was already used. Enter your email to get a new one.' : linkError);
+  } else if (await api.hasRecoverySession()) {
+    show('new');
+  } else {
+    show('reset');
+    msg('This reset link has expired or was already used. Enter your email to get a new one.');
+  }
+}
 
 if (params.get('msg') === 'suspended') msg('Your account is suspended. Contact an administrator.');
 else if (params.get('msg') === 'signedout') msg('You have been signed out.', 'info');
 if (!api.live) msg('Demo mode: Supabase isn’t connected yet, so no password is checked. Sign in as admin@cici.edu (admin) or paul.abian@student.cici.edu (student), or create an account.', 'info');
 
 // Already signed in (and not resetting a password)? Go straight in.
-if (!location.hash.includes('type=recovery')) {
+if (!isRecovery) {
   try { const me = await api.currentUser(); if (me && me.active) location.replace(nextPage || (isStaff(me) ? 'admin.html' : 'index.html')); } catch {}
 }
 </script>

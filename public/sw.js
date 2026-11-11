@@ -3,10 +3,10 @@
  * Network first: when online you always get the latest files; the saved copy is
  * only used when the network fails. Supabase requests (other domains) are never cached.
  */
-const CACHE = 'cici-v1';
+const CACHE = 'cici-v2';
 const APP_FILES = [
   'index.html', 'admin.html', 'login.html', 'offline.html',
-  'config.js', 'js/data.js', 'js/pwa.js', 'css/mobile.css',
+  'config.js', 'js/data.js', 'js/site.js', 'js/pwa.js', 'js/pw-toggle.js', 'css/mobile.css',
   'vendor/supabase/supabase.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png',
 ];

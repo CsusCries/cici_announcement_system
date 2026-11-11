@@ -200,7 +200,8 @@ export const api = {
 
   async resetPassword(email) {
     if (!live) throw new Error('Password reset needs Supabase. In demo mode no password is checked.');
-    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: base() + 'login.html' });
+    // ?reset=1 tells the sign-in page to open the "choose a new password" form.
+    const { error } = await sb.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: base() + 'login.html?reset=1' });
     fail(error);
   },
 
@@ -211,6 +212,20 @@ export const api = {
   },
 
   onRecovery(cb) { if (live) sb.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') cb(); }); },
+
+  // After opening a reset link: is there a session that allows setting a new password?
+  async hasRecoverySession() {
+    if (!live) return false;
+    const { data } = await sb.auth.getSession(); // also finishes reading the link's token from the URL
+    return !!data.session;
+  },
+
+  // Admins: give a user a new temporary password (no email needed). Checked again in the database.
+  async adminResetPassword(userId, newPassword) {
+    if (!live) return; // demo mode doesn't check passwords
+    const { error } = await sb.rpc('admin_set_password', { target: userId, new_password: newPassword });
+    fail(error);
+  },
 
   /* ---- announcements ---- */
   async listAnnouncements() {

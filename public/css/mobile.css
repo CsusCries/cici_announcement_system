@@ -6,6 +6,13 @@
  * - Space for the iPhone notch / home bar when installed to the home screen
  */
 
+/* Show/hide password button (js/pw-toggle.js) */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-right: 48px !important; }
+.pw-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; min-height: 0 !important;
+  display: grid; place-items: center; border: 0; background: none; color: #5b6b84; border-radius: 8px; cursor: pointer; padding: 0; margin: 0; }
+.pw-eye:hover { color: #0f1c3f; background: rgba(15, 28, 63, .06); }
+
 /* Elements that only belong on one size of screen */
 @media (min-width: 761px) { .mobile-only { display: none !important; } }
 

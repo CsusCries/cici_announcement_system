@@ -368,6 +368,20 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
   </main>
 </div>
 
+<!-- temporary password (admin reset) -->
+<dialog id="pwDlg" class="small">
+  <div class="dbox">
+    <h3>Temporary password</h3>
+    <p class="sub" id="pwFor" style="margin:4px 0 12px"></p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <code id="pwValue" style="font-size:22px;font-weight:700;letter-spacing:.06em;background:var(--blue-50);border:1px solid var(--border);border-radius:10px;padding:10px 14px;user-select:all"></code>
+      <button class="btn" data-act="pwCopy">Copy</button>
+    </div>
+    <p class="sub" style="margin-top:12px">Give this to them privately (in person or a direct message). They sign in with it, then change it in <b>Me → My profile</b>. It won't be shown again.</p>
+    <div class="dacts"><button class="btn primary" data-close>Done</button></div>
+  </div>
+</dialog>
+
 <!-- sign-up list -->
 <dialog id="suDlg">
   <div class="dbox">
@@ -462,6 +476,7 @@ const I = {
   copy: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
   trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
   power: '<path d="M12 2v10"/><path d="M5.6 6.6a9 9 0 1 0 12.8 0"/>',
+  key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2M16 7l3 3M18 5l2 2"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 let toastT;
@@ -613,6 +628,7 @@ function renderUsers() {
     <td data-l="Role"><select data-role="${esc(u.id)}" aria-label="Role for ${esc(u.name)}" ${self ? 'disabled title="You can’t change your own role"' : ''}>${['student', 'faculty', 'admin'].map((x) => `<option value="${x}" ${x === u.role ? 'selected' : ''}>${roleLabel(x)}</option>`).join('')}</select></td>
     <td data-l="Status"><span class="st ${u.active ? 'published' : 'draft'}">${u.active ? 'Active' : 'Suspended'}</span></td>
     <td><div class="acts">
+      ${self ? '' : `<button class="iconbtn" data-act="ureset" data-id="${esc(u.id)}" title="Reset password" aria-label="Reset password for ${esc(u.name)}">${icon('key')}</button>`}
       ${self ? '' : `<button class="iconbtn" data-act="uactive" data-id="${esc(u.id)}" title="${u.active ? 'Suspend' : 'Reactivate'}" aria-label="${u.active ? 'Suspend' : 'Reactivate'} ${esc(u.name)}">${icon('power')}</button>`}
     </div></td></tr>`;
   }).join('') : '<tr><td colspan="6"><p class="empty">No users match.</p></td></tr>';
@@ -956,6 +972,27 @@ document.addEventListener('click', async (e) => {
     case 'prev': if (--calM < 0) { calM = 11; calY--; } return renderCal();
     case 'next': if (++calM > 11) { calM = 0; calY++; } return renderCal();
     case 'thisMonth': calY = now.getFullYear(); calM = now.getMonth(); return renderCal();
+    case 'ureset': {
+      if (!confirm(`Reset the password for ${u.name} (${u.email})?\n\nTheir old password will stop working and you'll get a temporary one to give them.`)) return;
+      // Readable temporary password: no look-alike characters (0/O, 1/l/I).
+      const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+      const rnd = crypto.getRandomValues(new Uint32Array(10));
+      const temp = 'Cici-' + Array.from(rnd, (n) => chars[n % chars.length]).join('');
+      try {
+        await api.adminResetPassword(u.id, temp);
+        api.log(`Reset the password for ${u.name}`);
+        $('#pwFor').textContent = `New password for ${u.name} (${u.email}):`;
+        $('#pwValue').textContent = temp;
+        $('#pwDlg').showModal();
+      } catch (err) {
+        toast(/admin_set_password|function/i.test(err.message) ? 'Run migration 005 in Supabase first (see supabase/migrations).' : 'Couldn’t reset: ' + err.message);
+      }
+      return;
+    }
+    case 'pwCopy':
+      try { await navigator.clipboard.writeText($('#pwValue').textContent); toast('Password copied'); }
+      catch { toast('Select the password and copy it'); }
+      return;
     case 'uactive':
       if (u.active && !confirm(`Suspend ${u.name}? They won’t be able to sign in or see announcements.`)) return;
       return run(async () => { await api.updateProfile(u.id, { active: !u.active }); api.log(`${u.active ? 'Suspended' : 'Reactivated'} ${u.name}`); }, u.active ? 'User suspended' : 'User reactivated');
@@ -983,6 +1020,7 @@ document.addEventListener('change', async (e) => {
 });
 ['q', 'uq'].forEach((id) => $('#' + id).addEventListener('input', render));
 document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
+$('#pwDlg').addEventListener('close', () => { $('#pwValue').textContent = ''; });
 
 let reloadTimer;
 api.onAnnouncementsChange(() => { clearTimeout(reloadTimer); reloadTimer = setTimeout(refresh, 300); });
