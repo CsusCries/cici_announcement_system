@@ -298,6 +298,8 @@ export const api = {
     const id = (crypto.randomUUID && crypto.randomUUID()) || Date.now().toString(36) + Math.random().toString(36).slice(2);
     const path = `${new Date().getFullYear()}/${id}.${ext}`;
     const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false });
+    if (error && /bucket not found/i.test(error.message)) throw new Error('Photo storage isn’t set up yet. An admin needs to run supabase/migrations/003_photos.sql in Supabase.');
+    if (error && /row-level security|unauthorized|not allowed/i.test(error.message)) throw new Error('You don’t have permission to upload photos (admins and faculty only), or the photo storage rules are missing (run migration 003).');
     fail(error);
     return path;
   },
