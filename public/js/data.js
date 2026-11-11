@@ -148,6 +148,7 @@ export const api = {
       if (!u.active) throw new Error('This account is suspended.');
       local.set('session', { id: u.id }); return;
     }
+    email = email.trim().toLowerCase();
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
       // Turn Supabase's messages into ones people can act on.
@@ -181,6 +182,7 @@ export const api = {
       users.push(u); local.set('demoUsers', users); local.set('session', { id: u.id });
       return { needsConfirm: false };
     }
+    email = email.trim().toLowerCase();
     const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name, year_level: year }, emailRedirectTo: base() + 'login.html' } });
     if (error && /already (been )?registered|already exists/i.test(error.message)) throw new Error(ALREADY_REGISTERED);
     fail(error);
