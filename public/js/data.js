@@ -110,6 +110,8 @@ const demoItems = () => { const v = local.get('items', null); if (v) return v; l
 const demoUsers = () => { const v = local.get('demoUsers', null); if (v) return v; local.set('demoUsers', clone(DEMO_USERS)); return clone(DEMO_USERS); };
 const demoMe = () => { const s = local.get('session', null); return s && demoUsers().find((u) => u.id === s.id) || null; };
 
+const ALREADY_REGISTERED = 'This email already has an account, and its password was NOT changed. Sign in with your original password, or use “Forgot password?”.';
+
 /* ---------------- session cache ---------------- */
 let meCache = null;
 
@@ -180,7 +182,11 @@ export const api = {
       return { needsConfirm: false };
     }
     const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name, year_level: year }, emailRedirectTo: base() + 'login.html' } });
+    if (error && /already (been )?registered|already exists/i.test(error.message)) throw new Error(ALREADY_REGISTERED);
     fail(error);
+    // Supabase answers "success" for an email that already has an account (to hide which
+    // emails exist) but keeps the OLD password; it marks this with an empty identities list.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) throw new Error(ALREADY_REGISTERED);
     return { needsConfirm: !data.session };
   },
 
