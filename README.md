@@ -22,6 +22,10 @@ Then open http://localhost:8000/login.html. (Pages use ES modules, so open them 
 - `public/index.html`: student home. Shows posts for the student's year level, filter by type, search, sort, calendar day filter, register/join/remind, save (★), notifications, add to calendar (.ics), copy link, profile (name, year, password), display settings.
 - `public/admin.html`: admin panel for admins and faculty. Dashboard, announcements table (create/edit/publish/unpublish/pin/duplicate/delete, photos, bulk actions, CSV export), sign-up lists per announcement (with CSV), month calendar, users (admins only: roles, suspend, year level), settings.
 
+## Editable site content
+
+Admins change the site name, subtitle, logo, main colour, sign-in page text, home banner slides (up to 5) and footer in **Admin → Settings → Site content**. It is stored in the `site_settings` table (migration `004_site_settings.sql`); everyone can read it, only admins can change it.
+
 ## Mobile app
 
 On phones the pages switch to an app layout (bottom tab bar, bottom sheets, larger tap targets). The site is installable: Android/Chrome shows **Install app** (in the profile menu or admin Settings); on iPhone/iPad use Share → **Add to Home Screen**. A service worker (`public/sw.js`) keeps a copy of the app files so it still opens offline (network first, so online users always get the latest version).
@@ -29,6 +33,7 @@ On phones the pages switch to an app layout (bottom tab bar, bottom sheets, larg
 ## Code
 
 - `public/js/data.js`: data layer used by all three pages (Supabase or demo mode).
+- `public/js/site.js`: default site content and how it is applied to each page.
 - `public/css/mobile.css`: phone layout shared by all pages.
 - `public/manifest.webmanifest`, `public/sw.js`, `public/js/pwa.js`, `public/icons/`, `public/offline.html`: installable app support.
 - `public/config.js`: Supabase URL and anon key.
@@ -36,3 +41,4 @@ On phones the pages switch to an app layout (bottom tab bar, bottom sheets, larg
 - `supabase/migrations/`: changes to run on an existing database, in order. `schema.sql` already includes them.
   - `002_year_level.sql`: student year levels
   - `003_photos.sql`: announcement photos (storage bucket `announcement-images`)
+  - `004_site_settings.sql`: editable site content

@@ -227,6 +227,23 @@ export const api = {
       .subscribe();
   },
 
+  /* ---- editable site content (name, logo, colour, banner, footer) ---- */
+  // Readable by everyone, including the sign-in page before login.
+  async getSiteContent() {
+    if (!live) return local.get('siteContent', {});
+    const { data, error } = await sb.from('site_settings').select('content').eq('id', 1).maybeSingle();
+    fail(error);
+    return (data && data.content) || {};
+  },
+
+  // Admins only (enforced by the database).
+  async saveSiteContent(content) {
+    if (!live) return local.set('siteContent', content);
+    const { data, error } = await sb.from('site_settings').update({ content }).eq('id', 1).select('id');
+    fail(error);
+    if (!data.length) throw new Error('Only admins can change the site content. (If you are an admin, run migration 004 in Supabase.)');
+  },
+
   /* ---- photos ---- */
   // Returns a resized Blob ready to upload (call when the user picks a file, to show errors early).
   prepareImage(file) { return live ? shrinkImage(file, 1600, 0.82) : shrinkImage(file, 900, 0.72); },

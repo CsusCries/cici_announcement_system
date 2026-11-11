@@ -233,7 +233,7 @@ dialog .acts .sp{flex:1}
 <body>
 <div class="app" id="app">
   <aside class="side">
-    <div class="logo"><div class="mark"></div><div><b>CICI</b><small>Announcement<br>System</small></div></div>
+    <div class="logo"><div class="mark"></div><div><b data-site="name">CICI</b><small data-site="subtitle">Announcement System</small></div></div>
     <nav class="nav" id="nav">
       <button data-view="all"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>Home</button>
       <button data-view="event"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Events</button>
@@ -297,8 +297,8 @@ dialog .acts .sp{flex:1}
     <section class="cards" id="cards"><div class="empty">Loading announcements…</div></section>
 
     <footer>
-      <span><b>CICI</b> &nbsp;•&nbsp; Connect. Learn. Participate.</span>
-      <span id="modeNote">Stay informed. Stay ahead. ♡</span>
+      <span><b data-site="name">CICI</b> &nbsp;•&nbsp; <span data-site="footerLeft">Connect. Learn. Participate.</span></span>
+      <span id="modeNote" data-site="footerRight">Stay informed. Stay ahead. ♡</span>
     </footer>
   </main>
 
@@ -354,6 +354,7 @@ dialog .acts .sp{flex:1}
 
 <script type="module">
 import { api, isStaff, roleLabel, initials, visibleTo, YEARS } from './js/data.js';
+import { loadSite } from './js/site.js';
 
 /* ---------- sign-in gate ---------- */
 const me = await api.requireUser();
@@ -365,11 +366,8 @@ const TAG = { event: '', activity: 'act', exam: 'exam' };
 const IMG = { event: '', activity: 'green', exam: 'paper' };
 const ACTION = { event: ['Register', 'Registered ✓'], activity: ['Join', 'Joined ✓'], exam: ['Remind me', 'Reminder set ✓'] };
 const HASH = { all: '', event: 'events', activity: 'activities', exam: 'exams', saved: 'saved', mine: 'mine' };
-const SLIDES = [
-  { chip: '📢 Latest Announcement', title: 'Welcome to CICI!', text: 'Stay updated with the latest events, activities, and exams.', cta: 'View All Announcements →', view: 'all' },
-  { chip: '📅 Event', title: 'Don’t Miss Out', text: 'Browse upcoming events and register in one tap.', cta: 'See Events →', view: 'event' },
-  { chip: '📄 Exam', title: 'Stay Exam-Ready', text: 'Check the exam schedule and set reminders.', cta: 'View Exams →', view: 'exam' },
-];
+// Banner slides come from the editable site content (Admin → Settings → Site content).
+const SLIDES = (await loadSite()).slides;
 
 /* ---------- per-device preferences ---------- */
 const pref = {

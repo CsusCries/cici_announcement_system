@@ -161,6 +161,20 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
 .setrow small{display:block;color:var(--muted)}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--blue-d);color:#fff;padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+a.btn{text-decoration:none;color:var(--text);display:inline-block}
+a.btn.primary{color:#fff}
+/* site content editor */
+.grp{font-size:14px;margin:20px 0 0;color:var(--blue-d);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.grp .sub{font-weight:400}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.swatch{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--border);padding:0}
+.swatch.on{box-shadow:0 0 0 3px var(--text)}
+input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--border);border-radius:8px;background:#fff}
+.slide{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:10px;background:#fafcff}
+.slide-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.slide-head .acts{display:flex;gap:6px}
+#siteEditor .imgpick .thumbbox{background-size:contain;background-color:#fff}
+
 /* adaptive */
 @media (max-width:1100px){
   .app{grid-template-columns:minmax(0,1fr)}
@@ -201,7 +215,7 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="logo"><div class="mark"></div><div><b>CICI</b><small>Announcement System <span class="admintag">ADMIN</span></small></div></div>
+    <div class="logo"><div class="mark"></div><div><b data-site="name">CICI</b><small><span data-site="subtitle">Announcement System</span> <span class="admintag">ADMIN</span></small></div></div>
     <nav class="nav" id="nav">
       <button data-go="dash"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</button>
       <button data-go="ann"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span class="desktop-only">Announcements</span><span class="mobile-only">Posts</span> <span class="count" id="cAnn"></span></button>
@@ -212,7 +226,7 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
       <button data-act="student" class="desktop-only"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Student view</button>
       <button data-act="signout" class="desktop-only"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button>
     </nav>
-    <div class="who"><div class="avatar" id="meInit"></div><div><b id="meName"></b><small><span id="meRole"></span> · <span id="orgName">CICI</span></small></div></div>
+    <div class="who"><div class="avatar" id="meInit"></div><div><b id="meName"></b><small><span id="meRole"></span> · <span data-site="name">CICI</span></small></div></div>
   </aside>
 
   <main class="main">
@@ -296,8 +310,51 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
     <!-- SETTINGS -->
     <section id="v-settings" hidden>
       <div class="top"><div><h1>Settings</h1><p>System preferences</p></div></div>
+      <div class="panel" id="siteEditor" hidden style="margin-bottom:16px">
+        <h2>Site content <span class="sub" style="font-weight:400;font-size:13px">shown to everyone, including the sign-in page</span></h2>
+        <form id="siteForm" novalidate>
+          <h3 class="grp">Branding</h3>
+          <div class="row2">
+            <label class="fld">Site name<input name="name" maxlength="24" required></label>
+            <label class="fld">Subtitle<input name="subtitle" maxlength="40"></label>
+          </div>
+          <div class="fld">Logo <span class="sub" style="font-weight:400">(optional; replaces the round mark)</span>
+            <div class="imgpick">
+              <div class="thumbbox" id="logoBox">Default</div>
+              <div class="btns">
+                <label class="btn sm">Choose logo<input type="file" id="logoFile" accept="image/jpeg,image/png,image/webp,image/gif"></label>
+                <button type="button" class="btn sm danger" id="logoRemove" hidden>Use default</button>
+              </div>
+            </div>
+          </div>
+          <div class="fld">Main colour
+            <div class="swatches"><span class="swatches" id="swatches"></span><input type="color" name="color" aria-label="Custom colour"></div>
+          </div>
+
+          <h3 class="grp">Sign-in page</h3>
+          <label class="fld">Headline<input name="loginTitle" maxlength="60"></label>
+          <label class="fld">Description<textarea name="loginText" rows="2" maxlength="200"></textarea></label>
+
+          <h3 class="grp">Home page banner <span class="sub">up to 5 slides; students can swipe through them</span></h3>
+          <div id="slides"></div>
+          <button type="button" class="btn sm" id="addSlide" style="margin-top:10px">+ Add slide</button>
+
+          <h3 class="grp">Footer</h3>
+          <div class="row2">
+            <label class="fld">Left text<input name="footerLeft" maxlength="60"></label>
+            <label class="fld">Right text<input name="footerRight" maxlength="60"></label>
+          </div>
+
+          <div class="err" id="siteErr" role="alert"></div>
+          <div class="dacts">
+            <button type="button" class="btn danger" id="siteReset">Reset to default</button>
+            <span class="sp"></span>
+            <a class="btn" href="index.html" target="_blank" rel="noopener">Preview student page ↗</a>
+            <button type="submit" class="btn primary" id="siteSave">Save site content</button>
+          </div>
+        </form>
+      </div>
       <div class="panel">
-        <div class="setrow"><span>Organization name<small>Shown in the admin sidebar (this device)</small></span><input id="sOrg" maxlength="40" style="font:inherit;border:1px solid var(--border);border-radius:10px;padding:9px 11px"></div>
         <div class="setrow"><span>Default audience<small>Pre-selected when creating announcements (this device)</small></span>
           <select id="sAud"><option>All students</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Faculty</option></select></div>
         <div class="setrow"><span>New posts start as draft<small>Otherwise they publish immediately</small></span><input type="checkbox" id="sDraft"></div>
@@ -378,9 +435,11 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
 
 <script type="module">
 import { api, isAdmin, roleLabel, initials } from './js/data.js';
+import { loadSite, applySite, cleanSite, contrastWithWhite, DEFAULT_SITE, COLOR_PRESETS, SLIDE_TARGETS, LIMITS } from './js/site.js';
 
 /* ---------- sign-in gate: admins and faculty only ---------- */
 const me = await api.requireUser({ staff: true });
+let site = await loadSite();
 
 /* ---------- helpers ---------- */
 function $(s) { return document.querySelector(s); }
@@ -419,7 +478,7 @@ const pref = {
   get(k, d) { try { const v = localStorage.getItem('cici.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem('cici.' + k, JSON.stringify(v)); } catch {} },
 };
-let cfg = Object.assign({ org: 'CICI', audience: 'All students', draftFirst: false }, pref.get('adminCfg', {}));
+let cfg = Object.assign({ audience: 'All students', draftFirst: false }, pref.get('adminCfg', {}));
 const saveCfg = () => pref.set('adminCfg', cfg);
 
 /* ---------- server data ---------- */
@@ -463,7 +522,6 @@ function go(v) {
 function render() {
   $('#cAnn').textContent = items.length;
   $('#cUsers').textContent = users.length;
-  $('#orgName').textContent = cfg.org;
   ({ dash: renderDash, ann: renderTable, cal: renderCal, users: renderUsers, settings: renderSettings })[view]();
 }
 
@@ -560,10 +618,134 @@ function renderUsers() {
   }).join('') : '<tr><td colspan="6"><p class="empty">No users match.</p></td></tr>';
 }
 
-function renderSettings() { $('#sOrg').value = cfg.org; $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
+function renderSettings() { $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
 
 /* ---------- editor ---------- */
 // Photo picked in the editor: keep the current one, replace it with a new blob, or remove it.
+/* ---------- site content editor (admins only) ---------- */
+let siteDraft = null, logoBlob = null, logoPreview = '', logoRemoved = false;
+const siteForm = $('#siteForm');
+const SITE_TEXT_FIELDS = ['name', 'subtitle', 'loginTitle', 'loginText', 'footerLeft', 'footerRight'];
+$('#siteEditor').hidden = !isAdmin(me);
+
+function fillSiteForm() {
+  siteDraft = JSON.parse(JSON.stringify(site));
+  if (logoPreview) URL.revokeObjectURL(logoPreview);
+  logoBlob = null; logoPreview = ''; logoRemoved = false; $('#logoFile').value = '';
+  for (const k of SITE_TEXT_FIELDS) siteForm.elements[k].value = siteDraft[k];
+  siteForm.elements.color.value = siteDraft.color;
+  $('#siteErr').textContent = '';
+  renderSwatches(); renderSlides(); renderLogo();
+}
+function renderSwatches() {
+  const cur = siteForm.elements.color.value.toLowerCase();
+  $('#swatches').innerHTML = COLOR_PRESETS.map(([hex, label]) =>
+    `<button type="button" class="swatch ${cur === hex ? 'on' : ''}" data-color="${hex}" style="background:${hex}" title="${label}" aria-label="${label}" aria-pressed="${cur === hex}"></button>`).join('');
+}
+function renderLogo() {
+  const url = logoBlob ? logoPreview : logoRemoved ? '' : api.imageUrl(siteDraft.logo);
+  const box = $('#logoBox');
+  box.style.backgroundImage = url ? `url("${url}")` : '';
+  box.classList.toggle('has', !!url); box.textContent = url ? '' : 'Default';
+  $('#logoRemove').hidden = !url;
+}
+function renderSlides() {
+  const n = siteDraft.slides.length;
+  $('#slides').innerHTML = siteDraft.slides.map((sl, i) => `
+    <div class="slide" data-i="${i}">
+      <div class="slide-head"><b>Slide ${i + 1}</b><span class="acts">
+        <button type="button" class="iconbtn" data-slide="up" ${i === 0 ? 'disabled' : ''} aria-label="Move slide ${i + 1} up">↑</button>
+        <button type="button" class="iconbtn" data-slide="down" ${i === n - 1 ? 'disabled' : ''} aria-label="Move slide ${i + 1} down">↓</button>
+        <button type="button" class="iconbtn del" data-slide="remove" ${n === 1 ? 'disabled' : ''} aria-label="Remove slide ${i + 1}">✕</button>
+      </span></div>
+      <div class="row2">
+        <label class="fld">Label<input data-k="chip" maxlength="${LIMITS.chip}" value="${esc(sl.chip)}" placeholder="e.g. 📢 Latest Announcement"></label>
+        <label class="fld">Title<input data-k="title" maxlength="${LIMITS.title}" value="${esc(sl.title)}" required></label>
+      </div>
+      <label class="fld">Text<textarea data-k="text" rows="2" maxlength="${LIMITS.text}">${esc(sl.text)}</textarea></label>
+      <div class="row2">
+        <label class="fld">Button text<input data-k="cta" maxlength="${LIMITS.cta}" value="${esc(sl.cta)}" placeholder="e.g. See Events →"></label>
+        <label class="fld">Button opens<select data-k="view">${Object.entries(SLIDE_TARGETS).map(([v, l]) => `<option value="${v}" ${sl.view === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      </div>
+    </div>`).join('');
+  $('#addSlide').hidden = n >= LIMITS.slides;
+}
+$('#slides').addEventListener('input', (e) => {
+  const el = e.target.closest('[data-k]'); if (!el) return;
+  siteDraft.slides[+el.closest('.slide').dataset.i][el.dataset.k] = el.value;
+});
+$('#slides').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-slide]'); if (!b) return;
+  const i = +b.closest('.slide').dataset.i, arr = siteDraft.slides;
+  if (b.dataset.slide === 'up' && i > 0) [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+  if (b.dataset.slide === 'down' && i < arr.length - 1) [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
+  if (b.dataset.slide === 'remove' && arr.length > 1) arr.splice(i, 1);
+  renderSlides();
+});
+$('#addSlide').addEventListener('click', () => {
+  if (siteDraft.slides.length >= LIMITS.slides) return;
+  siteDraft.slides.push({ chip: '', title: '', text: '', cta: 'Learn more →', view: 'all' });
+  renderSlides();
+  $('#slides .slide:last-child [data-k=title]').focus();
+});
+$('#swatches').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-color]'); if (!b) return;
+  siteForm.elements.color.value = b.dataset.color; renderSwatches();
+});
+siteForm.elements.color.addEventListener('input', renderSwatches);
+$('#logoFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  $('#siteErr').textContent = 'Preparing logo…'; $('#siteSave').disabled = true;
+  try {
+    const blob = await api.prepareImage(file);
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    logoBlob = blob; logoPreview = URL.createObjectURL(blob); logoRemoved = false;
+    $('#siteErr').textContent = ''; renderLogo();
+  } catch (err) { $('#siteErr').textContent = err.message; e.target.value = ''; }
+  finally { $('#siteSave').disabled = false; }
+});
+$('#logoRemove').addEventListener('click', () => {
+  if (logoPreview) URL.revokeObjectURL(logoPreview);
+  logoBlob = null; logoPreview = ''; logoRemoved = true; $('#logoFile').value = ''; renderLogo();
+});
+
+async function publishSite(next, message) {
+  const oldLogo = site.logo;
+  await api.saveSiteContent(next);
+  if (oldLogo && oldLogo !== next.logo) await api.deleteImage(oldLogo);
+  site = next; applySite(site);
+  try { localStorage.setItem('cici.siteCache', JSON.stringify(site)); } catch {}
+  api.log(message); toast(message); fillSiteForm();
+}
+siteForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = (m) => { $('#siteErr').textContent = m; };
+  for (const k of SITE_TEXT_FIELDS) siteDraft[k] = siteForm.elements[k].value.trim();
+  siteDraft.color = siteForm.elements.color.value.toLowerCase();
+  if (!siteDraft.name) return err('Please enter a site name.');
+  if (contrastWithWhite(siteDraft.color) < 4.5) return err('That colour is too light: white text on it would be hard to read. Choose a darker colour.');
+  const blank = siteDraft.slides.findIndex((sl) => !sl.title.trim());
+  if (blank !== -1) return err(`Slide ${blank + 1} needs a title (or remove it).`);
+  const btn = $('#siteSave'); btn.disabled = true;
+  let uploaded = '';
+  try {
+    if (logoBlob) { err('Uploading logo…'); uploaded = siteDraft.logo = await api.uploadImage(logoBlob); }
+    else if (logoRemoved) siteDraft.logo = '';
+    err('');
+    await publishSite(cleanSite(siteDraft), 'Site content updated');
+    uploaded = '';
+  } catch (ex) {
+    err('Couldn’t save: ' + ex.message);
+    if (uploaded) api.deleteImage(uploaded);
+  } finally { btn.disabled = false; }
+});
+$('#siteReset').addEventListener('click', async () => {
+  if (!confirm('Reset the site name, logo, colour, sign-in text, banner and footer to the defaults?')) return;
+  try { await publishSite(cleanSite(DEFAULT_SITE), 'Site content reset to default'); }
+  catch (ex) { $('#siteErr').textContent = 'Couldn’t reset: ' + ex.message; }
+});
+if (isAdmin(me)) fillSiteForm();
+
 let photo = { current: '', blob: null, removed: false, preview: '' };
 function setPhotoPreview() {
   const url = photo.blob ? photo.preview : photo.removed ? '' : api.imageUrl(photo.current);
@@ -797,7 +979,6 @@ document.addEventListener('change', async (e) => {
   }
   if (t.id === 'sAud') { cfg.audience = t.value; saveCfg(); return toast('Default audience saved'); }
   if (t.id === 'sDraft') { cfg.draftFirst = t.checked; saveCfg(); return toast('Saved'); }
-  if (t.id === 'sOrg') { cfg.org = t.value.trim() || 'CICI'; saveCfg(); render(); return toast('Organization name saved'); }
   if (['fType', 'fStatus', 'fSort', 'uRole', 'uYear'].includes(t.id)) render();
 });
 ['q', 'uq'].forEach((id) => $('#' + id).addEventListener('input', render));
