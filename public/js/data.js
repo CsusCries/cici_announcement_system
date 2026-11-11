@@ -70,7 +70,7 @@ const toRow = (a) => {
   for (const [k, col] of Object.entries(map)) if (k in a) row[col] = (k === 'end' || k === 'image') ? (a[k] || null) : a[k];
   return row;
 };
-const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role, active: p.active, year: p.year_level || '' });
+const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role || 'student', active: p.active !== false, year: p.year_level || '' }); // missing 'active' column counts as active
 
 export const YEARS = ['1st year', '2nd year', '3rd year', '4th year'];
 // Who should see an announcement: staff see everything; students see "All students"
