@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="js/pwa.js" defer></script>
+<script src="js/nav-drawer.js" defer></script>
 <script src="js/pw-toggle.js" defer></script>
 <title>CICI Announcement System</title>
 <style>
@@ -89,6 +90,17 @@ a{color:inherit;text-decoration:none}
 .img.paper{background:linear-gradient(135deg,#eef2fb,#c8d3ea)}
 img.img{display:block;width:calc(100% - 28px);object-fit:cover;background:var(--blue-50)}
 .dimg{display:block;width:calc(100% + 48px);margin:-24px -24px 14px;height:220px;object-fit:cover;border-radius:18px 18px 0 0;background:var(--blue-50)}
+button.dimg-btn{display:block;padding:0;border:0;background:none;cursor:zoom-in;width:100%}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px;margin:10px 0}
+.gallery button{padding:0;border:0;border-radius:10px;overflow:hidden;aspect-ratio:1;cursor:zoom-in;background:var(--blue-50)}
+.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+.sched{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+.sched li{display:grid;gap:1px;padding:8px 10px;border-radius:10px;background:var(--blue-50);font-size:13px}
+.sched li b{font-size:14px}
+.sched li span{color:var(--muted)}
+.sched li.more{background:none;padding:0 2px;color:var(--muted)}
+.sec-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px}
+.lock-note{font-size:12px;font-weight:400;color:var(--muted)}
 .card .body{padding:14px;flex:1}
 .card h4{margin:0 0 8px;font-size:16px}
 .meta{color:var(--muted);font-size:13px;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
@@ -293,7 +305,7 @@ dialog .acts .sp{flex:1}
       <button data-view="saved">★ Saved</button>
       <button data-view="mine">✓ My list</button>
     </div>
-    <div class="yearbar" id="yearBar" hidden><span>📌 Set your year level so you only see announcements meant for you.</span><button class="btn primary" data-act="profile-edit">Set year level</button></div>
+    <div class="yearbar" id="yearBar" hidden><span>📌 Set your year level to see announcements for your year. Until then you only see posts for all students.</span><button class="btn primary" data-act="profile-edit">Set year level</button></div>
     <div class="filters" id="filters" hidden></div>
     <section class="cards" id="cards"><div class="empty">Loading announcements…</div></section>
 
@@ -333,7 +345,7 @@ dialog .acts .sp{flex:1}
     <h3>My profile</h3>
     <p class="mine" id="pfEmail"></p>
     <label class="fld">Full name<input name="name" maxlength="60" autocomplete="name" required></label>
-    <label class="fld" id="pfYearRow">Year level<select name="year"><option value="">Not set (see all years)</option></select></label>
+    <label class="fld" id="pfYearRow">Year level <span class="lock-note" id="pfYearNote"></span><select name="year"><option value="">Choose your year level…</option></select></label>
     <label class="fld" id="pfPwRow">New password <span class="mine">(leave blank to keep)</span><input name="password" type="password" minlength="8" autocomplete="new-password"></label>
     <div class="err" id="pfErr" role="alert"></div>
     <div class="acts"><span class="sp"></span><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary" id="pfSave">Save</button></div>
@@ -354,7 +366,8 @@ dialog .acts .sp{flex:1}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { api, isStaff, roleLabel, initials, visibleTo, YEARS } from './js/data.js';
+import { api, isStaff, roleLabel, initials, visibleTo, YEARS, audienceLabel, canManageType } from './js/data.js';
+import { openLightbox } from './js/lightbox.js';
 import { loadSite } from './js/site.js';
 
 /* ---------- sign-in gate ---------- */
@@ -413,7 +426,15 @@ const fmtShort = (a) => {
   return `${fmt(a.date, { month: 'short', day: 'numeric' })} – ${sameMonth ? D(a.end).getDate() : fmt(a.end, { month: 'short', day: 'numeric' })}`;
 };
 const endOf = (a) => a.end || a.date;
-const covers = (a, day) => a.date <= day && endOf(a) >= day;
+const covers = (a, day) => (a.date <= day && endOf(a) >= day) || (a.schedules || []).some((x) => x.date === day);
+// '13:30' → '1:30 PM'
+const fmtTime = (t) => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
+const schedWhen = (x) => [fmt(x.date, { weekday: 'short', month: 'short', day: 'numeric' }), x.start ? fmtTime(x.start) + (x.end ? '–' + fmtTime(x.end) : '') : '', x.room ? esc(x.room) : ''].filter(Boolean).join(' · ');
+const scheduleList = (a, max) => {
+  const xs = a.schedules || []; if (!xs.length) return '';
+  const shown = max ? xs.slice(0, max) : xs;
+  return `<ul class="sched">${shown.map((x) => `<li><b>${esc(x.subject)}</b><span>${schedWhen(x)}</span></li>`).join('')}${max && xs.length > max ? `<li class="more">+${xs.length - max} more in Details</li>` : ''}</ul>`;
+};
 const daysUntil = (s) => Math.round((D(s) - D(TODAY)) / 86400000);
 const when = (a) => {
   if (covers(a, TODAY)) return 'Happening now';
@@ -495,9 +516,10 @@ function renderCards() {
       ${a.image ? `<img class="img" src="${esc(api.imageUrl(a.image))}" alt="" loading="lazy">` : `<div class="img ${IMG[a.type]}"></div>`}
       <div class="body">
         <h4><button class="titlebtn" data-act="open" data-id="${a.id}">${esc(a.title)}</button></h4>
-        <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}</div>
+        <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}${(a.photos || []).length > 1 ? `<span>📷 ${a.photos.length} photos</span>` : ''}</div>
+        ${scheduleList(a, 3)}
         <p>${esc(a.body)}</p>
-        <span class="mine">${when(a)}${a.audience && a.audience !== 'All students' ? ' · For ' + esc(a.audience) : ''}</span>
+        <span class="mine">${when(a)}${audienceLabel(a) !== 'All students' ? ' · For ' + esc(audienceLabel(a)) : ''}</span>
       </div>
       <div class="foot">${actionBtn(a)}<button class="linkbtn" data-act="open" data-id="${a.id}">Details →</button></div>
     </article>`).join('') : `<div class="empty">${emptyMsg}</div>`;
@@ -506,7 +528,7 @@ function renderCal() {
   $('#monthLabel').textContent = new Date(calYear, calMonth, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const first = new Date(calYear, calMonth, 1).getDay();
   const days = new Date(calYear, calMonth + 1, 0).getDate();
-  const marks = new Set(); all().forEach((a) => { marks.add(a.date); marks.add(endOf(a)); });
+  const marks = new Set(); all().forEach((a) => { marks.add(a.date); marks.add(endOf(a)); (a.schedules || []).forEach((x) => marks.add(x.date)); });
   let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<span class="dow">${d}</span>`).join('');
   for (let i = 0; i < first; i++) html += '<button class="blank" disabled tabindex="-1"></button>';
   for (let d = 1; d <= days; d++) {
@@ -550,18 +572,21 @@ function openDetail(id) {
   if (!a) { if ($('#detail').open) $('#detail').close(); return toast('That announcement is no longer available'); }
   read.add(a.id); persistPrefs(); renderNotif();
   $('#detailBody').innerHTML = `
-    ${a.image && !settings.compact ? `<img class="dimg" src="${esc(api.imageUrl(a.image))}" alt="">` : ''}
+    ${a.image && !settings.compact ? `<button class="dimg-btn" data-act="photo" data-id="${a.id}" data-i="0" aria-label="View photo"><img class="dimg" src="${esc(api.imageUrl(a.image))}" alt=""></button>` : ''}
     <span class="pill ${TAG[a.type]}">${PILL[a.type]}</span> <span class="mine">${when(a)}</span>
     <h3>${esc(a.title)}</h3>
-    <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}<span>👥 ${esc(a.audience || 'All students')}</span></div>
+    <div class="meta"><span>📅 ${fmtLong(a)}</span>${a.where ? `<span>📍 ${esc(a.where)}</span>` : ''}<span>👥 ${esc(audienceLabel(a))}</span></div>
     <p>${esc(a.body) || '<span class="mine">No details.</span>'}</p>
+    ${(a.schedules || []).length ? `<div class="sec-label">Exam schedule (${a.schedules.length})</div>${scheduleList(a)}` : ''}
+    ${(a.photos || []).length > 1 || ((a.photos || []).length && settings.compact) ? `<div class="sec-label">Photos (${a.photos.length}) · tap to enlarge</div>
+      <div class="gallery">${a.photos.map((p, i) => `<button data-act="photo" data-id="${a.id}" data-i="${i}" aria-label="View photo ${i + 1} of ${a.photos.length}"><img src="${esc(api.imageUrl(p))}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
     <div class="acts">
       <button class="btn" data-act="ics" data-id="${a.id}">📆 Add to calendar</button>
       <button class="btn" data-act="share" data-id="${a.id}">🔗 Copy link</button>
       <button class="btn" data-act="save" data-id="${a.id}">${saved.has(a.id) ? '★ Saved' : '☆ Save'}</button>
     </div>
     <div class="acts">
-      ${isStaff(me) ? `<a class="btn" href="admin.html#edit-${a.id}">Edit in admin</a>` : ''}
+      ${canManageType(me, a.type) ? `<a class="btn" href="admin.html#edit-${a.id}">Edit in admin</a>` : ''}
       <span class="sp"></span>
       <button class="btn" data-close>Close</button>
       ${actionBtn(a)}
@@ -578,7 +603,7 @@ function downloadIcs(a) {
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
   const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CICI//Announcements//EN', 'BEGIN:VEVENT',
     `UID:cici-${a.id}@cici`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${dt(a.date)}`, `DTEND;VALUE=DATE:${dt(next(endOf(a)))}`,
-    `SUMMARY:${t(a.title)}`, `LOCATION:${t(a.where)}`, `DESCRIPTION:${t(a.body)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    `SUMMARY:${t(a.title)}`, `LOCATION:${t(a.where)}`, `DESCRIPTION:${t([a.body, ...(a.schedules || []).map((x) => `${x.subject}: ${x.date}${x.start ? ' ' + x.start + (x.end ? '-' + x.end : '') : ''}${x.room ? ' (' + x.room + ')' : ''}`)].filter(Boolean).join('\n'))}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
   const link = Object.assign(document.createElement('a'), { href: url, download: a.title.replace(/[^\w]+/g, '-') + '.ics' });
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -646,6 +671,7 @@ document.addEventListener('click', async (e) => {
 
   switch (btn.dataset.act) {
     case 'open': closeMenus(); return openDetail(btn.dataset.id);
+    case 'photo': return openLightbox((a.photos || []).map((p) => api.imageUrl(p)), +btn.dataset.i || 0);
     case 'reg': return toggleFlag(reg, a, (id, on) => api.toggleSignup(id, on),
       { event: [`Registered for ${a.title}`, 'Registration cancelled'], activity: [`Joined ${a.title}`, 'You left this activity'], exam: [`Reminder set for ${a.title}`, 'Reminder removed'] }[a.type]);
     case 'save': return toggleFlag(saved, a, (id, on) => api.toggleSave(id, on), ['Saved', 'Removed from saved']);
@@ -684,6 +710,9 @@ function openProfile() {
   f.elements.name.value = me.name; f.elements.year.value = me.year || '';
   $('#pfEmail').textContent = `${me.email} · ${roleLabel(me.role)}`;
   $('#pfYearRow').hidden = me.role !== 'student';
+  // Students choose their year once; after that only an admin can change it (the database enforces this).
+  f.elements.year.disabled = !!me.year;
+  $('#pfYearNote').textContent = me.year ? '(set — ask an admin to change it)' : '(you can set this once)';
   $('#pfPwRow').hidden = !api.live;
   $('#profileDlg').showModal();
 }
@@ -691,11 +720,12 @@ $('#profileForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target.elements, name = f.name.value.trim(), year = f.year.value, pw = f.password.value;
   if (!name) return ($('#pfErr').textContent = 'Please enter your name.');
-  if (pw && pw.length < 8) return ($('#pfErr').textContent = 'Password must be at least 8 characters.');
+  if (pw && (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw))) return ($('#pfErr').textContent = 'Password must be at least 8 characters and include a letter and a number.');
+  if (me.role === 'student' && !me.year && !year) return ($('#pfErr').textContent = 'Please choose your year level.');
   const btn = $('#pfSave'); btn.disabled = true;
   try {
     const patch = { name };
-    if (me.role === 'student') patch.year = year;
+    if (me.role === 'student' && !me.year) patch.year = year;
     const yearChanged = 'year' in patch && patch.year !== me.year;
     await api.updateMyProfile(patch);
     if (pw) await api.updatePassword(pw);

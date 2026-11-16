@@ -50,37 +50,73 @@ async function shrinkImage(file, maxSide, quality) {
 }
 const blobToDataUrl = (blob) => new Promise((resolve, reject) => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.onerror = reject; fr.readAsDataURL(blob); });
 
-export const isStaff = (u) => !!u && (u.role === 'admin' || u.role === 'faculty');
+// Roles: student, faculty (Faculty Admin), governor (Governor Admin), admin.
+export const ROLES = {
+  student:  { label: 'Student',        info: 'Sees announcements for their year level; can register, save and get reminders.' },
+  governor: { label: 'Governor Admin', info: 'Student/organization governor: manages Events and Activities (not exams) and sees their sign-ups.' },
+  faculty:  { label: 'Faculty Admin',  info: 'Manages all announcements, including exams and exam schedules, and sees sign-ups.' },
+  admin:    { label: 'Admin',          info: 'Full access: everything above plus users, roles, passwords and site content.' },
+};
+export const isStaff = (u) => !!u && (u.role === 'admin' || u.role === 'faculty' || u.role === 'governor');
 export const isAdmin = (u) => !!u && u.role === 'admin';
-export const roleLabel = (r) => ({ student: 'Student', faculty: 'Faculty', admin: 'Admin' }[r] || r);
+export const roleLabel = (r) => (ROLES[r] ? ROLES[r].label : r);
+// Which announcement types a user may create, edit and delete (the database checks the same rule).
+export const canManageType = (u, type) => !!u && (u.role === 'admin' || u.role === 'faculty' || (u.role === 'governor' && (type === 'event' || type === 'activity')));
 export const initials = (name) => (name || '?').split(/\s+/).filter((w) => /^[A-Za-z]/.test(w) && !w.endsWith('.')).map((w) => w[0].toUpperCase()).slice(0, 2).join('') || '?';
 
 const base = () => location.origin + location.pathname.replace(/[^/]*$/, '');
 const fail = (error) => { if (error) throw new Error(error.message || String(error)); };
 
 /* ---------------- mapping between DB rows and page objects ---------------- */
-const fromRow = (r) => ({
-  id: r.id, type: r.type, title: r.title, date: r.date, end: r.end_date || undefined,
-  where: r.location || '', body: r.body || '', audience: r.audience || 'All students',
-  pinned: !!r.pinned, status: r.status, created: Date.parse(r.created_at), image: r.image_path || '',
-});
+// Old posts stored one audience label; turn it into the year list used now.
+const legacyYears = (aud) => (YEARS.includes(aud) ? [aud] : []);
+const byPosition = (x, y) => (x.position ?? 0) - (y.position ?? 0) || (x.id ?? 0) - (y.id ?? 0);
+
+const fromRow = (r) => {
+  const photos = (r.announcement_photos || []).slice().sort(byPosition).map((p) => p.path);
+  if (!photos.length && r.image_path) photos.push(r.image_path);
+  return {
+    id: r.id, type: r.type, title: r.title, date: r.date, end: r.end_date || undefined,
+    where: r.location || '', body: r.body || '',
+    years: Array.isArray(r.audience_years) ? r.audience_years : legacyYears(r.audience),
+    staffOnly: r.staff_only ?? r.audience === 'Faculty',
+    pinned: !!r.pinned, status: r.status, created: Date.parse(r.created_at),
+    photos, image: photos[0] || '',
+    schedules: (r.exam_schedules || []).slice().sort(byPosition).map((x) => ({
+      subject: x.subject, date: x.exam_date, start: (x.start_time || '').slice(0, 5), end: (x.end_time || '').slice(0, 5), room: x.room || '',
+    })),
+  };
+};
 const toRow = (a) => {
-  const map = { type: 'type', title: 'title', date: 'date', end: 'end_date', where: 'location', body: 'body', audience: 'audience', pinned: 'pinned', status: 'status', image: 'image_path' };
+  const map = { type: 'type', title: 'title', date: 'date', end: 'end_date', where: 'location', body: 'body', pinned: 'pinned', status: 'status', image: 'image_path', years: 'audience_years', staffOnly: 'staff_only' };
   const row = {};
   for (const [k, col] of Object.entries(map)) if (k in a) row[col] = (k === 'end' || k === 'image') ? (a[k] || null) : a[k];
+  if ('years' in a || 'staffOnly' in a) row.audience = audienceLabel(a); // readable label, e.g. for exports
   return row;
+};
+
+// A database error that means migration 006 hasn't been run yet.
+const NEEDS_006 = /exam_schedules|announcement_photos|audience_years|staff_only|admin_delete_user|relationship/i;
+const failWith006 = (error) => {
+  if (error && NEEDS_006.test(error.message || '')) throw new Error('The database needs an update: an admin must run supabase/migrations/006_targeting_roles_schedules_gallery.sql in Supabase.');
+  fail(error);
 };
 const fromProfile = (p) => ({ id: p.id, email: p.email, name: p.full_name || p.email.split('@')[0], role: p.role || 'student', active: p.active !== false, year: p.year_level || '' }); // missing 'active' column counts as active
 
 export const YEARS = ['1st year', '2nd year', '3rd year', '4th year'];
-// Who should see an announcement: staff see everything; students see "All students"
-// posts plus their own year (all years if they haven't set one); "Faculty" posts are staff-only.
+// Who sees an announcement (the database enforces the same rule):
+// staff see everything; students see posts for all students plus posts that list their
+// own year level; staff-only posts are hidden from students. No year set = general posts only.
 export const visibleTo = (u, a) => {
   if (isStaff(u)) return true;
-  const aud = a.audience || 'All students';
-  if (aud === 'All students') return true;
-  if (aud === 'Faculty') return false;
-  return !u?.year || aud === u.year;
+  if (a.staffOnly) return false;
+  const ys = a.years || [];
+  return ys.length === 0 || (!!u?.year && ys.includes(u.year));
+};
+export const audienceLabel = (a) => {
+  if (a.staffOnly) return 'Staff only';
+  const ys = (a.years || []).slice().sort();
+  return ys.length === 0 ? 'All students' : ys.join(', ');
 };
 
 /* ---------------- demo (localStorage) ---------------- */
@@ -105,8 +141,19 @@ const DEMO_USERS = [
   { id: 'u3', name: 'Ana Cruz', email: 'ana.cruz@student.cici.edu', role: 'student', active: false, year: '3rd year' },
   { id: 'u4', name: 'Prof. L. Garcia', email: 'l.garcia@cici.edu', role: 'faculty', active: true },
   { id: 'u5', name: 'Demo Admin', email: 'admin@cici.edu', role: 'admin', active: true },
+  { id: 'u6', name: 'Gov. R. Lim', email: 'governor@cici.edu', role: 'governor', active: true, year: '3rd year' },
+  { id: 'u7', name: 'Rico Reyes', email: 'rico.reyes@student.cici.edu', role: 'student', active: true, year: '4th year' },
 ];
-const demoItems = () => { const v = local.get('items', null); if (v) return v; local.set('items', clone(DEMO_ITEMS)); return clone(DEMO_ITEMS); };
+// Bring demo items saved by older versions up to the current shape.
+const upgradeDemoItem = (a) => {
+  if (!Array.isArray(a.years)) a.years = legacyYears(a.audience);
+  if (a.staffOnly === undefined) a.staffOnly = a.audience === 'Faculty';
+  if (!Array.isArray(a.photos)) a.photos = a.image ? [a.image] : [];
+  if (!Array.isArray(a.schedules)) a.schedules = [];
+  a.image = a.photos[0] || '';
+  return a;
+};
+const demoItems = () => { const v = local.get('items', null) || clone(DEMO_ITEMS); const out = v.map(upgradeDemoItem); if (!local.get('items', null)) local.set('items', out); return out; };
 const demoUsers = () => { const v = local.get('demoUsers', null); if (v) return v; local.set('demoUsers', clone(DEMO_USERS)); return clone(DEMO_USERS); };
 const demoMe = () => { const s = local.get('session', null); return s && demoUsers().find((u) => u.id === s.id) || null; };
 
@@ -174,7 +221,9 @@ export const api = {
     fail(error);
   },
 
-  async signUp(name, email, password, year = '') {
+  async signUp(name, email, password, year) {
+    if (!String(name || '').trim()) throw new Error('Please enter your full name.');
+    if (!YEARS.includes(year)) throw new Error('Please choose your year level.');
     if (!live) {
       const users = demoUsers();
       if (users.some((x) => x.email === email.toLowerCase())) throw new Error('That email already has an account.');
@@ -185,6 +234,7 @@ export const api = {
     email = email.trim().toLowerCase();
     const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name, year_level: year }, emailRedirectTo: base() + 'login.html' } });
     if (error && /already (been )?registered|already exists/i.test(error.message)) throw new Error(ALREADY_REGISTERED);
+    if (error && /database error saving new user/i.test(error.message)) throw new Error('Your account couldn’t be created: full name and year level are required. Please check the form and try again.');
     fail(error);
     // Supabase answers "success" for an email that already has an account (to hide which
     // emails exist) but keeps the OLD password; it marks this with an empty identities list.
@@ -229,25 +279,55 @@ export const api = {
 
   /* ---- announcements ---- */
   async listAnnouncements() {
-    if (!live) { const all = demoItems(); return isStaff(meCache) ? all : all.filter((a) => a.status !== 'draft'); }
-    const { data, error } = await sb.from('announcements').select('*').order('date');
+    if (!live) { const all = demoItems(); return isStaff(meCache) ? all : all.filter((a) => a.status !== 'draft' && visibleTo(meCache, a)); }
+    // The database only returns what this user may see (year level, staff-only, drafts).
+    let { data, error } = await sb.from('announcements').select('*, exam_schedules(*), announcement_photos(*)').order('date');
+    if (error && NEEDS_006.test(error.message || '')) ({ data, error } = await sb.from('announcements').select('*').order('date')); // before migration 006
     fail(error);
     return data.map(fromRow);
   },
 
+  // a.schedules (exam schedule rows) and a.photos (storage paths, first = cover) are optional;
+  // when given they replace the announcement's current ones.
   async saveAnnouncement(a) {
+    const { schedules, photos, ...core } = a;
+    if (photos) core.image = photos[0] || '';
     if (!live) {
       const all = demoItems();
       let out;
-      if (a.id) { out = Object.assign(all.find((x) => x.id === a.id), a); if (!a.end) delete out.end; }
-      else { out = { ...a, id: Math.max(0, ...all.map((x) => x.id)) + 1, signups: 0, created: Date.now() }; if (!out.end) delete out.end; all.push(out); }
+      if (a.id) { out = Object.assign(all.find((x) => x.id === a.id), core); if (!core.end) delete out.end; }
+      else { out = { ...core, id: Math.max(0, ...all.map((x) => x.id)) + 1, signups: 0, created: Date.now(), schedules: [], photos: [] }; if (!out.end) delete out.end; all.push(out); }
+      if (schedules) out.schedules = clone(schedules);
+      if (photos) out.photos = photos.slice();
       local.set('items', all); return clone(out);
     }
-    const row = toRow(a);
+    const row = toRow(core);
     const q = a.id ? sb.from('announcements').update(row).eq('id', a.id) : sb.from('announcements').insert(row);
     const { data, error } = await q.select().single();
-    fail(error);
-    return fromRow(data);
+    failWith006(error);
+    const saved = Array.isArray(data) ? data[0] : data;
+    const id = a.id || (saved && saved.id);
+    if (!id) throw new Error('The announcement was saved, but its schedules and photos could not be linked. Please refresh and try again.');
+    if (schedules) {
+      const del = await sb.from('exam_schedules').delete().eq('announcement_id', id);
+      failWith006(del.error);
+      if (schedules.length) {
+        const ins = await sb.from('exam_schedules').insert(schedules.map((x, i) => ({
+          announcement_id: id, subject: x.subject, exam_date: x.date,
+          start_time: x.start || null, end_time: x.end || null, room: x.room || '', position: i,
+        })));
+        failWith006(ins.error);
+      }
+    }
+    if (photos) {
+      const del = await sb.from('announcement_photos').delete().eq('announcement_id', id);
+      failWith006(del.error);
+      if (photos.length) {
+        const ins = await sb.from('announcement_photos').insert(photos.map((path, i) => ({ announcement_id: id, path, position: i })));
+        failWith006(ins.error);
+      }
+    }
+    return { ...fromRow({ ...saved, id }), schedules: schedules ? clone(schedules) : [], photos: photos ? photos.slice() : [] };
   },
 
   async updateAnnouncements(ids, patch) {
@@ -375,8 +455,20 @@ export const api = {
     if (!data.length) throw new Error('You don’t have permission to change this user.');
   },
 
+  // Admins: delete a user account (database function; not yourself).
+  async adminDeleteUser(id) {
+    if (!live) {
+      if (id === meCache?.id) throw new Error('You cannot delete your own account');
+      local.set('demoUsers', demoUsers().filter((u) => u.id !== id)); local.del('reg.' + id); local.del('saved.' + id);
+      return;
+    }
+    const { error } = await sb.rpc('admin_delete_user', { target: id });
+    failWith006(error);
+  },
+
   // Change your own name / year level.
   async updateMyProfile(patch) {
+    if ('year' in patch && meCache.year && patch.year !== meCache.year && !isAdmin(meCache)) throw new Error('Only an admin can change your year level.');
     await this.updateProfile(meCache.id, patch);
     Object.assign(meCache, patch);
     return meCache;

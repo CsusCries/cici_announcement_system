@@ -48,12 +48,21 @@ update public.profiles set role = 'admin' where email = 'you@example.com';
 
 After that, promote or suspend other users from the admin panel's **Users** page.
 
+## Updating an existing database
+
+If your database was set up with an earlier version, run the files in [`migrations/`](migrations) you haven't run yet, in order (each is safe to run twice). The latest is **`006_targeting_roles_schedules_gallery.sql`**: year-level targeting enforced in the database, Faculty/Governor admin roles, exam schedules, photo galleries and admin update/delete of users. Running the whole `schema.sql` again also works: it adds whatever is missing without deleting data.
+
+After 006, sign-up requires a full name and a year level (1st–4th year). Accounts can't be created from the Supabase dashboard's **Add user** button any more (it sends no year level); have people sign up on the site, then change their role in **Users**.
+
+Supabase also checks passwords: set **Authentication → Sign In / Providers → Email → Minimum password length** to 8 (and require letters and digits) to match the site's rule.
+
 ## Roles
 
-| Role | Student page | Admin panel | Announcements | Users page |
+| Role | Student page | Admin panel | Announcements | Users and site content |
 |---|---|---|---|---|
-| Student | ✓ | — | read published, sign up, save | — |
-| Faculty | ✓ | ✓ | create, edit, publish, delete | — |
-| Admin | ✓ | ✓ | create, edit, publish, delete | change roles, suspend |
+| Student | ✓ (own year level only) | — | read, register, save | — |
+| Governor Admin | ✓ | ✓ | events and activities: create, edit, delete | — |
+| Faculty Admin | ✓ | ✓ | all types incl. exams and exam schedules | — |
+| Admin | ✓ | ✓ | all types | year levels, roles, suspend, reset passwords, delete users; site content |
 
-Suspended accounts can't see anything or sign up for anything. These rules are enforced in the database (row level security), not just hidden in the page.
+Suspended accounts can't see anything or sign up for anything. These rules are enforced in the database (row level security and database functions), not just hidden in the page.

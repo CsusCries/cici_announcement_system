@@ -84,15 +84,15 @@ form[hidden]{display:none}
 
     <form id="fUp" novalidate hidden>
       <h2>Create your account</h2>
-      <p class="sub">New accounts start as students. An admin can change your role.</p>
+      <p class="sub">All fields are required. New accounts start as students; an admin can change your role.</p>
       <label>Full name<input name="name" autocomplete="name" maxlength="60" required></label>
       <label>Email<input name="email" type="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email" required></label>
-      <label>Year level<select name="year" required>
-        <option value="">Choose…</option>
+      <label>Current year level<select name="year" required>
+        <option value="">Choose your year level…</option>
         <option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option>
-        <option value="none">Not a student (faculty / staff)</option>
       </select></label>
-      <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Password <span style="font-weight:400">(at least 8 characters, with a letter and a number)</span><input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Confirm password<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Create account</button>
     </form>
 
@@ -107,7 +107,7 @@ form[hidden]{display:none}
 
     <form id="fNew" novalidate hidden>
       <h2>Choose a new password</h2>
-      <p class="sub">At least 8 characters.</p>
+      <p class="sub">At least 8 characters, with a letter and a number.</p>
       <label>New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
       <label>Type it again<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Save password</button>
@@ -173,13 +173,16 @@ $('#resendBtn').addEventListener('click', async () => {
 $('#fUp').addEventListener('submit', (e) => {
   e.preventDefault(); const f = e.target.elements;
   const name = f.name.value.trim(), email = f.email.value.trim().toLowerCase(), password = f.password.value, year = f.year.value;
-  if (!name) return msg('Please enter your name.');
-  if (!emailOk(email)) return msg('Please enter a valid email.');
-  if (!year) return msg('Please choose your year level.');
-  if (password.length < 8) return msg('Password must be at least 8 characters.');
+  const problems = [];
+  if (!name) problems.push('your full name');
+  if (!emailOk(email)) problems.push('a valid email address (for example name@isufst.edu.ph)');
+  if (!year) problems.push('your current year level');
+  if (problems.length) return msg('Please enter ' + problems.join(', ') + '.');
+  if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) return msg('Password must be at least 8 characters and include a letter and a number.');
+  if (password !== f.password2.value) return msg('The two passwords don’t match.');
   busy(e.target, async () => {
-    const { needsConfirm } = await api.signUp(name, email, password, year === 'none' ? '' : year);
-    if (needsConfirm) { show('in'); msg('Account created. Check your email to confirm it, then sign in.', 'ok'); }
+    const { needsConfirm } = await api.signUp(name, email, password, year);
+    if (needsConfirm) { show('in'); msg('Account created! Check your email to confirm it, then sign in.', 'ok'); }
     else await goIn();
   });
 });
@@ -192,7 +195,7 @@ $('#fReset').addEventListener('submit', (e) => {
 
 $('#fNew').addEventListener('submit', (e) => {
   e.preventDefault(); const pw = e.target.elements.password.value;
-  if (pw.length < 8) return msg('Password must be at least 8 characters.');
+  if (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return msg('Password must be at least 8 characters and include a letter and a number.');
   if (pw !== e.target.elements.password2.value) return msg('The two passwords don’t match.');
   busy(e.target, async () => {
     try { await api.updatePassword(pw); }
@@ -226,7 +229,7 @@ if (isRecovery) {
 
 if (params.get('msg') === 'suspended') msg('Your account is suspended. Contact an administrator.');
 else if (params.get('msg') === 'signedout') msg('You have been signed out.', 'info');
-if (!api.live) msg('Demo mode: Supabase isn’t connected yet, so no password is checked. Sign in as admin@cici.edu (admin) or paul.abian@student.cici.edu (student), or create an account.', 'info');
+if (!api.live) msg('Demo mode: Supabase isn’t connected yet, so no password is checked. Sign in as admin@cici.edu (Admin), l.garcia@cici.edu (Faculty Admin), governor@cici.edu (Governor Admin), paul.abian@student.cici.edu (2nd-year student) or rico.reyes@student.cici.edu (4th-year student), or create an account.', 'info');
 
 // Already signed in (and not resetting a password)? Go straight in.
 if (!isRecovery) {

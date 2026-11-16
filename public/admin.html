@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="js/pwa.js" defer></script>
+<script src="js/nav-drawer.js" defer></script>
 <title>CICI Admin</title>
 <style>
 :root{--blue:#1d4ed8;--blue-d:#1e3a8a;--blue-600:#2563eb;--blue-100:#e0eaff;--blue-50:#f2f6ff;--white:#fff;--text:#0f1c3f;--muted:#5b6b84;--border:#e2e8f0;--red:#c81e1e;--green:#0f6b55;--green-bg:#d9f5ee;--amber:#8a5a00;--amber-bg:#fff1d6}
@@ -163,6 +164,50 @@ dialog::backdrop{background:rgba(15,28,63,.45)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 a.btn{text-decoration:none;color:var(--text);display:inline-block}
 a.btn.primary{color:#fff}
+/* announcement editor: audience, schedules, photo gallery */
+fieldset.fld{border:0;padding:0;margin:12px 0 0;min-width:0}
+fieldset.fld legend{padding:0;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.aud-modes{display:flex;gap:8px 16px;flex-wrap:wrap}
+.radio{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text);min-height:36px;cursor:pointer}
+.radio input{width:18px;height:18px;accent-color:var(--blue-600)}
+.years{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.years[hidden]{display:none}
+.chkpill{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;color:var(--text);background:#fff;cursor:pointer;min-height:38px}
+.chkpill:has(input:checked){background:var(--blue-100);border-color:var(--blue-600);color:var(--blue-d)}
+.chkpill input{width:16px;height:16px;accent-color:var(--blue-600)}
+.hint{display:block;margin-top:6px;font-weight:400}
+.sched-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;grid-template-areas:"subj subj room del" "date start end end";gap:6px 8px;align-items:end;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:#fafcff;margin-top:6px}
+.sched-row .subj{grid-area:subj}.sched-row .sdate{grid-area:date}.sched-row .sstart{grid-area:start}.sched-row .send{grid-area:end}.sched-row .sroom{grid-area:room}.sched-row .sdel{grid-area:del}
+#editDlg label.btn{cursor:pointer;display:inline-block;position:relative;color:var(--text)}
+#editDlg label.btn input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.sched-row label{display:grid;gap:2px;font-size:11px;font-weight:600;color:var(--muted);min-width:0}
+.sched-row input{font:inherit;font-size:14px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;background:#fff;color:var(--text);width:100%;min-width:0}
+#addSched{margin-top:8px}
+.gal-edit{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:6px}
+.gal-edit:empty{display:none}
+.gal-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--blue-50);border:1px solid var(--border)}
+.gal-item img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.gal-item .cover{position:absolute;left:4px;top:4px;background:var(--blue-d);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px}
+.gal-item .gbtns{position:absolute;right:4px;bottom:4px;display:flex;gap:4px}
+.gal-item .gbtns button{width:30px;height:30px;border-radius:8px;border:0;background:rgba(255,255,255,.92);color:var(--text);font-size:14px;display:grid;place-items:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.gal-item .gbtns button.del{color:var(--red)}
+.gal-item.new::after{content:"new";position:absolute;right:4px;top:4px;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px}
+.viewonly{font-size:12px;color:var(--muted);font-weight:600}
+@media (max-width:560px){
+  .sched-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;grid-template-areas:"subj subj del" "date date date" "start end end" "room room room"}
+}
+
+/* users */
+.yearsum{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.ysum{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;text-align:left}
+.ysum b{font-size:20px;color:var(--blue-d);line-height:1.1}
+.ysum span{font-size:12px;color:var(--muted)}
+.ysum.on{border-color:var(--blue-600);background:var(--blue-50)}
+.rolepill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;display:inline-block;background:#eef1f6;color:#475569}
+.rolepill.admin{background:var(--blue-d);color:#fff}
+.rolepill.faculty{background:var(--blue-100);color:var(--blue-d)}
+.rolepill.governor{background:var(--green-bg);color:var(--green)}
+
 /* site content editor */
 .grp{font-size:14px;margin:20px 0 0;color:var(--blue-d);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 .grp .sub{font-weight:400}
@@ -191,7 +236,9 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
   .cell{min-height:64px;padding:4px}
   .chip{font-size:0;padding:0;height:6px;border-radius:3px}
   .more{font-size:11px;padding:0}
-  /* table becomes stacked cards, no sideways scrolling */
+}
+@media (max-width:900px){
+  /* tables become stacked cards (phones and portrait tablets): nothing cut off, no sideways scrolling */
   .tablebox{background:none;border:0;overflow:visible}
   table,tbody,tr,td{display:block;width:100%}
   thead{display:none}
@@ -201,6 +248,13 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
   tbody tr td:last-child{grid-column:1/-1}
   td[data-l]::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
   .acts{justify-content:flex-start}
+}
+@media (min-width:761px) and (max-width:900px){
+  /* portrait tablets: use the width — three fields per line */
+  #rows tr{grid-template-columns:auto repeat(3,minmax(0,1fr))}
+  #rows td[data-l="Title"]{grid-column:span 3}
+  #urows tr{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #urows td[data-l="Email"]{grid-column:span 2}
 }
 @media (max-width:560px){
   .side{padding:8px 12px}.logo{display:none}
@@ -292,16 +346,17 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
     <!-- USERS -->
     <section id="v-users" hidden>
       <div class="top">
-        <div><h1>Users</h1><p>People join by creating an account on the sign-in page. Change roles or suspend access here.</p></div>
+        <div><h1>Users</h1><p>People join by creating an account on the sign-in page. Update year levels and roles, reset passwords, suspend or delete accounts here.</p></div>
       </div>
       <div class="toolbar">
         <label class="search"><span aria-hidden="true">🔍</span><input id="uq" type="search" placeholder="Search name or email…" aria-label="Search users"></label>
-        <select id="uRole" aria-label="Role"><option value="">All roles</option><option>Student</option><option>Faculty</option><option>Admin</option></select>
+        <select id="uRole" aria-label="Role"><option value="">All roles</option><option value="student">Student</option><option value="faculty">Faculty Admin</option><option value="governor">Governor Admin</option><option value="admin">Admin</option></select>
         <select id="uYear" aria-label="Year level"><option value="">All years</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option value="none">Year not set</option></select>
       </div>
+      <div class="yearsum" id="yearSum"></div>
       <div class="tablebox">
         <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Year</th><th>Role</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Email</th><th>Year level</th><th>Role</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
           <tbody id="urows"></tbody>
         </table>
       </div>
@@ -368,6 +423,27 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
   </main>
 </div>
 
+<!-- update a user -->
+<dialog id="userDlg" class="small">
+  <form class="dbox" id="userForm" novalidate>
+    <h3 id="ufTitle">Update user</h3>
+    <p class="sub" id="ufEmail" style="margin:2px 0 4px"></p>
+    <label class="fld">Full name<input name="name" maxlength="60" required></label>
+    <label class="fld">Year level<select name="year"><option value="">None (staff account)</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option></select></label>
+    <label class="fld">Role<select name="role"><option value="student">Student</option><option value="governor">Governor Admin</option><option value="faculty">Faculty Admin</option><option value="admin">Admin</option></select></label>
+    <p class="sub" id="ufRoleInfo" style="margin:6px 0 0"></p>
+    <p class="sub" id="ufSelfNote" hidden style="margin:6px 0 0">You can’t change your own role or deactivate yourself.</p>
+    <label class="chk" id="ufActiveRow"><input type="checkbox" name="active"> Account active (can sign in)</label>
+    <div class="err" id="ufErr" role="alert"></div>
+    <div class="dacts">
+      <button type="button" class="btn danger" id="ufDelete">Delete user</button>
+      <span class="sp"></span>
+      <button type="button" class="btn" data-close>Cancel</button>
+      <button type="submit" class="btn primary">Save changes</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- temporary password (admin reset) -->
 <dialog id="pwDlg" class="small">
   <div class="dbox">
@@ -409,17 +485,34 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
           <label class="fld">Start date<input name="date" type="date" required></label>
           <label class="fld">End date (optional)<input name="end" type="date"></label>
         </div>
-        <div class="row2">
-          <label class="fld">Location<input name="where" maxlength="60" placeholder="Room 105, Online…"></label>
-          <label class="fld">Audience<select name="audience"><option>All students</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Faculty</option></select></label>
+        <label class="fld">Location<input name="where" maxlength="60" placeholder="Room 105, Online…"></label>
+
+        <fieldset class="fld aud">
+          <legend>Who can see this</legend>
+          <div class="aud-modes">
+            <label class="radio"><input type="radio" name="audMode" value="all"> All students</label>
+            <label class="radio"><input type="radio" name="audMode" value="years"> Selected year levels</label>
+            <label class="radio"><input type="radio" name="audMode" value="staff"> Staff only</label>
+          </div>
+          <div class="years" id="yearBoxes">
+            <label class="chkpill"><input type="checkbox" name="yr" value="1st year"> 1st year</label>
+            <label class="chkpill"><input type="checkbox" name="yr" value="2nd year"> 2nd year</label>
+            <label class="chkpill"><input type="checkbox" name="yr" value="3rd year"> 3rd year</label>
+            <label class="chkpill"><input type="checkbox" name="yr" value="4th year"> 4th year</label>
+          </div>
+          <span class="sub hint" id="audHint"></span>
+        </fieldset>
+
+        <div class="fld" id="schedBox" hidden>Exam schedules <span class="sub" style="font-weight:400">one row per subject or session · the announcement's dates follow these</span>
+          <div id="schedRows"></div>
+          <button type="button" class="btn sm" id="addSched">+ Add schedule</button>
         </div>
-        <div class="fld">Photo <span class="sub" style="font-weight:400">(optional, resized automatically)</span>
-          <div class="imgpick">
-            <div class="thumbbox" id="imgBox">No photo</div>
-            <div class="btns">
-              <label class="btn sm">Choose photo<input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp,image/gif"></label>
-              <button type="button" class="btn sm danger" id="imgRemove" hidden>Remove</button>
-            </div>
+
+        <div class="fld">Photos <span class="sub" style="font-weight:400">(optional · up to 50 · the first one is the cover)</span>
+          <div class="gal-edit" id="galEdit"></div>
+          <div class="btns" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+            <label class="btn sm">+ Add photos<input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp,image/gif" multiple></label>
+            <span class="sub" id="galInfo"></span>
           </div>
         </div>
         <label class="fld">Details<textarea name="body" rows="4" maxlength="400"></textarea></label>
@@ -448,7 +541,8 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { api, isAdmin, roleLabel, initials } from './js/data.js';
+import { api, isAdmin, roleLabel, initials, canManageType, audienceLabel, YEARS, ROLES } from './js/data.js';
+import { openLightbox } from './js/lightbox.js';
 import { loadSite, applySite, cleanSite, contrastWithWhite, DEFAULT_SITE, COLOR_PRESETS, SLIDE_TARGETS, LIMITS } from './js/site.js';
 
 /* ---------- sign-in gate: admins and faculty only ---------- */
@@ -570,7 +664,7 @@ function renderDash() {
 function tableItems() {
   const q = $('#q').value.trim().toLowerCase(), t = $('#fType').value, st = $('#fStatus').value, so = $('#fSort').value;
   return items.filter((a) => (!t || a.type === t) && (!st || statusOf(a) === st)
-      && (!q || [a.title, a.where, a.body, a.audience].join(' ').toLowerCase().includes(q)))
+      && (!q || [a.title, a.where, a.body, audienceLabel(a), ...(a.schedules || []).map((x) => x.subject + ' ' + x.room)].join(' ').toLowerCase().includes(q)))
     .sort({ date: (a, b) => a.date.localeCompare(b.date), new: (a, b) => (b.created || b.id) - (a.created || a.id), signups: (a, b) => signups(b) - signups(a), az: (a, b) => a.title.localeCompare(b.title) }[so]);
 }
 
@@ -580,21 +674,22 @@ function renderTable() {
   $('#rows').innerHTML = list.length ? list.map((a) => {
     const s = statusOf(a);
     return `<tr class="${selected.has(a.id) ? 'sel' : ''}">
-      <td class="cb"><input type="checkbox" data-sel="${a.id}" ${selected.has(a.id) ? 'checked' : ''} aria-label="Select ${esc(a.title)}"></td>
-      <td data-l="Title">${a.image ? `<img class="thumb" src="${esc(api.imageUrl(a.image))}" alt="" loading="lazy">` : ''}<button class="t" data-edit="${a.id}">${a.pinned ? '📌 ' : ''}${esc(a.title)}</button><span class="sub">${esc(a.where || '—')} · ${esc(a.audience || 'All students')}</span></td>
+      <td class="cb">${canManage(a) ? `<input type="checkbox" data-sel="${a.id}" ${selected.has(a.id) ? 'checked' : ''} aria-label="Select ${esc(a.title)}">` : ''}</td>
+      <td data-l="Title">${a.image ? `<img class="thumb" src="${esc(api.imageUrl(a.image))}" alt="" loading="lazy">` : ''}<button class="t" data-edit="${a.id}">${a.pinned ? '📌 ' : ''}${esc(a.title)}</button><span class="sub">${esc(a.where || '—')} · 👥 ${esc(audienceLabel(a))}${(a.schedules || []).length ? ` · 🗓 ${a.schedules.length} schedule${a.schedules.length > 1 ? 's' : ''}` : ''}${(a.photos || []).length > 1 ? ` · 📷 ${a.photos.length}` : ''}</span></td>
       <td data-l="Type"><span class="pill ${a.type}">${TYPE[a.type]}</span></td>
       <td data-l="Date">${range(a)}</td>
       <td data-l="Status"><span class="st ${s}">${STATUS[s]}</span></td>
       <td data-l="Sign-ups"><button class="linkbtn" data-signups="${a.id}" title="See who signed up">${signups(a)}${a.type === 'exam' ? ' reminders' : ''} →</button></td>
-      <td><div class="acts">
+      <td><div class="acts">${!canManage(a) ? '<span class="viewonly">View only</span>' : `
         <button class="iconbtn" data-act="edit" data-id="${a.id}" title="Edit" aria-label="Edit">${icon('edit')}</button>
         <button class="iconbtn ${a.pinned ? 'on' : ''}" data-act="pin" data-id="${a.id}" title="${a.pinned ? 'Unpin' : 'Pin'}" aria-label="${a.pinned ? 'Unpin' : 'Pin'}" aria-pressed="${!!a.pinned}">${icon('pin')}</button>
         <button class="iconbtn" data-act="toggle" data-id="${a.id}" title="${a.status === 'draft' ? 'Publish' : 'Unpublish'}" aria-label="${a.status === 'draft' ? 'Publish' : 'Unpublish'}">${icon(a.status === 'draft' ? 'eye' : 'eyeoff')}</button>
         <button class="iconbtn" data-act="dup" data-id="${a.id}" title="Duplicate" aria-label="Duplicate">${icon('copy')}</button>
-        <button class="iconbtn del" data-act="del" data-id="${a.id}" title="Delete" aria-label="Delete">${icon('trash')}</button>
+        <button class="iconbtn del" data-act="del" data-id="${a.id}" title="Delete" aria-label="Delete">${icon('trash')}</button>`}
       </div></td></tr>`;
   }).join('') : '<tr><td colspan="7"><p class="empty">No announcements match these filters.</p></td></tr>';
-  $('#selAll').checked = list.length > 0 && list.every((a) => selected.has(a.id));
+  const selectable = list.filter(canManage);
+  $('#selAll').checked = selectable.length > 0 && selectable.every((a) => selected.has(a.id));
   $('#bulk').hidden = !selected.size;
   $('#bulkN').textContent = `${selected.size} selected`;
 }
@@ -606,7 +701,7 @@ function renderCal() {
   for (let i = 0; i < first; i++) h += '<div class="cell out"></div>';
   for (let d = 1; d <= days; d++) {
     const k = iso(calY, calM, d);
-    const on = items.filter((a) => a.date <= k && endOf(a) >= k).sort((a, b) => a.date.localeCompare(b.date));
+    const on = items.filter((a) => (a.date <= k && endOf(a) >= k) || (a.schedules || []).some((x) => x.date === k)).sort((a, b) => a.date.localeCompare(b.date));
     h += `<div class="cell ${k === TODAY ? 'today' : ''}"><button class="n" data-newon="${k}" aria-label="Add announcement on ${fmt(k)}" title="Add on this day">${d}</button>
       ${on.slice(0, 3).map((a) => `<button class="chip ${a.type} ${a.status === 'draft' ? 'draft' : ''}" data-edit="${a.id}" title="${esc(a.title)}">${esc(a.title)}</button>`).join('')}
       ${on.length > 3 ? `<span class="more">+${on.length - 3} more</span>` : ''}</div>`;
@@ -618,21 +713,87 @@ function renderCal() {
 
 function renderUsers() {
   const q = $('#uq').value.trim().toLowerCase(), r = $('#uRole').value, y = $('#uYear').value;
-  const list = users.filter((u) => (!r || roleLabel(u.role) === r) && (!y || (y === 'none' ? u.role === 'student' && !u.year : u.year === y)) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
+  const list = users.filter((u) => (!r || u.role === r) && (!y || (y === 'none' ? !u.year : u.year === y)) && (!q || (u.name + ' ' + u.email).toLowerCase().includes(q)));
+  // Students per year level, so admins can see the classification at a glance.
+  const students = users.filter((u) => u.role === 'student');
+  $('#yearSum').innerHTML = [...YEARS, ''].map((yr) => {
+    const n = students.filter((u) => (u.year || '') === yr).length;
+    if (!yr && !n) return '';
+    return `<button class="ysum ${y === (yr || 'none') ? 'on' : ''}" data-yfilter="${yr || 'none'}"><b>${n}</b><span>${yr || 'Year not set'}</span></button>`;
+  }).join('');
   $('#urows').innerHTML = list.length ? list.map((u) => {
     const self = u.id === me.id;
     return `<tr>
     <td data-l="Name"><span class="user"><span class="ua">${esc(initials(u.name))}</span><b>${esc(u.name)}${self ? ' (you)' : ''}</b></span></td>
     <td data-l="Email">${esc(u.email)}</td>
-    <td data-l="Year">${u.role === 'student' ? esc(u.year || 'Not set') : '<span class="sub">—</span>'}</td>
-    <td data-l="Role"><select data-role="${esc(u.id)}" aria-label="Role for ${esc(u.name)}" ${self ? 'disabled title="You can’t change your own role"' : ''}>${['student', 'faculty', 'admin'].map((x) => `<option value="${x}" ${x === u.role ? 'selected' : ''}>${roleLabel(x)}</option>`).join('')}</select></td>
+    <td data-l="Year level">${u.year ? esc(u.year) : `<span class="sub">${u.role === 'student' ? '⚠ Not set' : '—'}</span>`}</td>
+    <td data-l="Role"><span class="rolepill ${u.role}">${esc(roleLabel(u.role))}</span></td>
     <td data-l="Status"><span class="st ${u.active ? 'published' : 'draft'}">${u.active ? 'Active' : 'Suspended'}</span></td>
     <td><div class="acts">
+      <button class="iconbtn" data-act="uedit" data-id="${esc(u.id)}" title="Update" aria-label="Update ${esc(u.name)}">${icon('edit')}</button>
       ${self ? '' : `<button class="iconbtn" data-act="ureset" data-id="${esc(u.id)}" title="Reset password" aria-label="Reset password for ${esc(u.name)}">${icon('key')}</button>`}
       ${self ? '' : `<button class="iconbtn" data-act="uactive" data-id="${esc(u.id)}" title="${u.active ? 'Suspend' : 'Reactivate'}" aria-label="${u.active ? 'Suspend' : 'Reactivate'} ${esc(u.name)}">${icon('power')}</button>`}
+      ${self ? '' : `<button class="iconbtn del" data-act="udelete" data-id="${esc(u.id)}" title="Delete" aria-label="Delete ${esc(u.name)}">${icon('trash')}</button>`}
     </div></td></tr>`;
   }).join('') : '<tr><td colspan="6"><p class="empty">No users match.</p></td></tr>';
 }
+
+/* ---------- update / delete a user (admins) ---------- */
+let editingUser = null;
+function openUserEditor(u) {
+  editingUser = u;
+  const f = $('#userForm'), self = u.id === me.id;
+  f.reset(); $('#ufErr').textContent = '';
+  $('#ufTitle').textContent = `Update ${u.name}`;
+  $('#ufEmail').textContent = u.email;
+  f.elements.name.value = u.name;
+  f.elements.year.value = u.year || '';
+  f.elements.role.value = u.role;
+  f.elements.role.disabled = self;
+  f.elements.active.checked = u.active;
+  $('#ufActiveRow').hidden = self;
+  $('#ufDelete').hidden = self;
+  $('#ufSelfNote').hidden = !self;
+  syncRoleInfo();
+  $('#userDlg').showModal();
+  f.elements.name.focus();
+}
+function syncRoleInfo() { $('#ufRoleInfo').textContent = ROLES[$('#userForm').elements.role.value].info; }
+$('#userForm').elements.role.addEventListener('change', syncRoleInfo);
+async function deleteUser(u) {
+  if (!confirm(`Delete ${u.name} (${u.email})?\n\nThis permanently removes their account, sign-ups and saved items. It can't be undone.`)) return false;
+  try {
+    await api.adminDeleteUser(u.id);
+    api.log(`Deleted user ${u.name} (${u.email})`);
+    toast('User deleted');
+    await refresh();
+    return true;
+  } catch (err) { toast('Couldn’t delete: ' + err.message); return false; }
+}
+$('#ufDelete').addEventListener('click', async () => { if (await deleteUser(editingUser)) $('#userDlg').close(); });
+$('#userForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target.elements, u = editingUser, self = u.id === me.id;
+  const patch = { name: f.name.value.trim(), year: f.year.value };
+  if (!self) { patch.role = f.role.value; patch.active = f.active.checked; }
+  const role = patch.role || u.role;
+  if (!patch.name) return ($('#ufErr').textContent = 'Please enter a name.');
+  if (role === 'student' && !patch.year) return ($('#ufErr').textContent = 'Students need a year level so they receive the right announcements.');
+  const btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
+  try {
+    await api.updateProfile(u.id, patch);
+    const changes = [];
+    if (patch.year !== (u.year || '')) changes.push(`year → ${patch.year || 'none'}`);
+    if (patch.role && patch.role !== u.role) changes.push(`role → ${roleLabel(patch.role)}`);
+    if ('active' in patch && patch.active !== u.active) changes.push(patch.active ? 'reactivated' : 'suspended');
+    if (patch.name !== u.name) changes.push('name');
+    api.log(`Updated ${patch.name}${changes.length ? ': ' + changes.join(', ') : ''}`);
+    $('#userDlg').close();
+    toast('User updated');
+    await refresh();
+  } catch (err) { $('#ufErr').textContent = 'Couldn’t save: ' + err.message; }
+  finally { btn.disabled = false; }
+});
 
 function renderSettings() { $('#sAud').value = cfg.audience; $('#sDraft').checked = cfg.draftFirst; }
 
@@ -762,108 +923,211 @@ $('#siteReset').addEventListener('click', async () => {
 });
 if (isAdmin(me)) fillSiteForm();
 
-let photo = { current: '', blob: null, removed: false, preview: '' };
-function setPhotoPreview() {
-  const url = photo.blob ? photo.preview : photo.removed ? '' : api.imageUrl(photo.current);
-  const box = $('#imgBox');
-  box.style.backgroundImage = url ? `url("${url}")` : '';
-  box.classList.toggle('has', !!url); box.textContent = url ? '' : 'No photo';
-  $('#imgRemove').hidden = !url;
-  $('#pImg').style.backgroundImage = url ? `url("${url}")` : '';
-  $('#pImg').classList.toggle('has', !!url);
+/* ---------- announcement editor ---------- */
+const MAX_PHOTOS = 50;
+// Photos being edited: { path } for saved ones, { blob, url } for new ones not uploaded yet.
+let gallery = [];
+let originalPhotos = [];
+let schedules = [];
+
+const canManage = (a) => canManageType(me, a.type);
+
+function renderGallery() {
+  $('#galEdit').innerHTML = gallery.map((g, i) => `
+    <div class="gal-item ${g.blob ? 'new' : ''}">
+      <img src="${esc(g.blob ? g.url : api.imageUrl(g.path))}" alt="Photo ${i + 1}" data-gview="${i}">
+      ${i === 0 ? '<span class="cover">Cover</span>' : ''}
+      <span class="gbtns">
+        ${i > 0 ? `<button type="button" data-gcover="${i}" title="Make cover" aria-label="Make photo ${i + 1} the cover">★</button>` : ''}
+        <button type="button" class="del" data-gdel="${i}" title="Remove" aria-label="Remove photo ${i + 1}">✕</button>
+      </span>
+    </div>`).join('');
+  $('#galInfo').textContent = gallery.length ? `${gallery.length} photo${gallery.length > 1 ? 's' : ''}${gallery.length >= MAX_PHOTOS ? ' (maximum reached)' : ''}` : 'No photos yet';
+  updateCover();
 }
-function resetPhoto(current = '') {
-  if (photo.preview) URL.revokeObjectURL(photo.preview);
-  photo = { current, blob: null, removed: false, preview: '' };
-  $('#imgFile').value = '';
-  setPhotoPreview();
+function updateCover() {
+  const cover = gallery[0] ? (gallery[0].blob ? gallery[0].url : api.imageUrl(gallery[0].path)) : '';
+  $('#pImg').style.backgroundImage = cover ? `url("${cover}")` : '';
+  $('#pImg').classList.toggle('has', !!cover);
 }
+function clearGallery() {
+  gallery.forEach((g) => g.url && URL.revokeObjectURL(g.url));
+  gallery = [];
+}
+$('#galEdit').addEventListener('click', (e) => {
+  const v = e.target.closest('[data-gview]'), c = e.target.closest('[data-gcover]'), d = e.target.closest('[data-gdel]');
+  if (v) return openLightbox(gallery.map((g) => (g.blob ? g.url : api.imageUrl(g.path))), +v.dataset.gview);
+  if (c) { const [g] = gallery.splice(+c.dataset.gcover, 1); gallery.unshift(g); return renderGallery(); }
+  if (d) { const [g] = gallery.splice(+d.dataset.gdel, 1); if (g.url) URL.revokeObjectURL(g.url); return renderGallery(); }
+});
 $('#imgFile').addEventListener('change', async (e) => {
-  const file = e.target.files[0]; if (!file) return;
-  $('#formErr').textContent = 'Preparing photo…';
-  $('#formSubmit').disabled = true; // don't let Save run with the old photo while this one is processing
-  try {
-    const blob = await api.prepareImage(file);
-    if (photo.preview) URL.revokeObjectURL(photo.preview);
-    photo.blob = blob; photo.removed = false; photo.preview = URL.createObjectURL(blob);
-    $('#formErr').textContent = '';
-    setPhotoPreview();
-  } catch (err) { $('#formErr').textContent = err.message; e.target.value = ''; }
-  finally { $('#formSubmit').disabled = false; }
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  const room = MAX_PHOTOS - gallery.length;
+  if (room <= 0) return ($('#formErr').textContent = `An announcement can have at most ${MAX_PHOTOS} photos.`);
+  const take = files.slice(0, room);
+  $('#formSubmit').disabled = true; // don't save while photos are still being prepared
+  const problems = [];
+  for (let i = 0; i < take.length; i++) {
+    $('#formErr').textContent = `Preparing photo ${i + 1} of ${take.length}…`;
+    try { const blob = await api.prepareImage(take[i]); gallery.push({ blob, url: URL.createObjectURL(blob) }); renderGallery(); }
+    catch (err) { problems.push(`${take[i].name}: ${err.message}`); }
+  }
+  if (files.length > take.length) problems.push(`Only ${take.length} added: the limit is ${MAX_PHOTOS} photos.`);
+  $('#formErr').textContent = problems.join(' ');
+  $('#formSubmit').disabled = false;
 });
-$('#imgRemove').addEventListener('click', () => {
-  if (photo.preview) URL.revokeObjectURL(photo.preview);
-  photo.blob = null; photo.preview = ''; photo.removed = true; $('#imgFile').value = '';
-  setPhotoPreview();
+
+// Exam schedule rows
+function renderSchedules() {
+  $('#schedRows').innerHTML = schedules.map((x, i) => `
+    <div class="sched-row" data-si="${i}">
+      <label class="subj">Subject / session<input data-sk="subject" maxlength="80" value="${esc(x.subject)}" placeholder="e.g. Data Structures"></label>
+      <label class="sdate">Date<input type="date" data-sk="date" value="${esc(x.date)}"></label>
+      <label class="sstart">Start time<input type="time" data-sk="start" value="${esc(x.start)}"></label>
+      <label class="send">End time<input type="time" data-sk="end" value="${esc(x.end)}"></label>
+      <label class="sroom">Room<input data-sk="room" maxlength="60" value="${esc(x.room)}" placeholder="Room 105"></label>
+      <button type="button" class="iconbtn del sdel" data-sdel="${i}" aria-label="Remove schedule ${i + 1}">${icon('trash')}</button>
+    </div>`).join('') || '<p class="sub" style="margin:6px 0 0">No schedules yet.</p>';
+}
+$('#schedRows').addEventListener('input', (e) => {
+  const el = e.target.closest('[data-sk]'); if (!el) return;
+  schedules[+el.closest('.sched-row').dataset.si][el.dataset.sk] = el.value;
 });
-// Delete photos that no remaining announcement uses (duplicates can share one).
+$('#schedRows').addEventListener('click', (e) => {
+  const d = e.target.closest('[data-sdel]'); if (!d) return;
+  schedules.splice(+d.dataset.sdel, 1); renderSchedules();
+});
+$('#addSched').addEventListener('click', () => {
+  const last = schedules[schedules.length - 1];
+  schedules.push({ subject: '', date: last ? last.date : ($('#form').elements.date.value || TODAY), start: last ? last.start : '', end: last ? last.end : '', room: '' });
+  renderSchedules();
+  $('#schedRows .sched-row:last-child [data-sk=subject]').focus();
+});
+
+// Audience controls
+function setAudience(years, staffOnly) {
+  const f = $('#form').elements;
+  const mode = staffOnly ? 'staff' : years.length ? 'years' : 'all';
+  f.audMode.value = mode;
+  document.querySelectorAll('#yearBoxes input').forEach((c) => { c.checked = years.includes(c.value); });
+  syncAudience();
+}
+function syncAudience() {
+  const mode = $('#form').elements.audMode.value;
+  $('#yearBoxes').hidden = mode !== 'years';
+  $('#audHint').textContent = mode === 'all' ? 'Every student can see it.' : mode === 'staff' ? 'Only admins, faculty and governors can see it.' : 'Only students in the ticked year levels can see it.';
+}
+
+// Delete photos that no remaining announcement uses (duplicates can share them).
 async function cleanupImages(paths, remaining) {
-  const used = new Set(remaining.map((x) => x.image).filter(Boolean));
+  const used = new Set(remaining.flatMap((x) => x.photos && x.photos.length ? x.photos : [x.image]).filter(Boolean));
   for (const p of new Set(paths.filter(Boolean))) if (!used.has(p)) await api.deleteImage(p);
 }
 async function removeAnnouncements(list) {
   const ids = list.map((x) => x.id);
   await api.deleteAnnouncements(ids);
-  await cleanupImages(list.map((x) => x.image), items.filter((x) => !ids.includes(x.id)));
+  await cleanupImages(list.flatMap((x) => x.photos || [x.image]), items.filter((x) => !ids.includes(x.id)));
 }
 
 function openEditor(a, preset = {}) {
+  if (a && !canManage(a)) return toast(`${TYPE[a.type]} announcements can only be edited by Faculty Admins and Admins.`);
   editingId = a ? a.id : null;
   const f = $('#form'); f.reset(); $('#formErr').textContent = '';
   $('#formTitle').textContent = a ? 'Edit announcement' : 'New announcement';
   $('#formSubmit').textContent = a ? 'Save changes' : 'Create';
   $('#formDelete').hidden = !a;
-  const src = a || { type: 'event', status: cfg.draftFirst ? 'draft' : 'published', date: TODAY, audience: cfg.audience, ...preset };
-  for (const k of ['title', 'type', 'status', 'date', 'end', 'where', 'audience', 'body']) f.elements[k].value = src[k] || '';
+  // Governors can't pick the Exam type.
+  f.elements.type.querySelector('option[value=exam]').disabled = !canManageType(me, 'exam');
+  const defYears = YEARS.includes(cfg.audience) ? [cfg.audience] : [];
+  const src = a || { type: 'event', status: cfg.draftFirst ? 'draft' : 'published', date: TODAY, years: defYears, staffOnly: cfg.audience === 'Faculty', ...preset };
+  for (const k of ['title', 'type', 'status', 'date', 'end', 'where', 'body']) f.elements[k].value = src[k] || '';
   f.elements.pinned.checked = !!src.pinned;
-  resetPhoto(a ? a.image || '' : '');
+  setAudience(src.years || [], !!src.staffOnly);
+  clearGallery();
+  originalPhotos = a ? (a.photos && a.photos.length ? a.photos.slice() : a.image ? [a.image] : []) : [];
+  gallery = originalPhotos.map((path) => ({ path }));
+  schedules = a && a.schedules ? a.schedules.map((x) => ({ ...x })) : [];
+  renderGallery(); renderSchedules();
   preview(); $('#editDlg').showModal(); f.elements.title.focus();
 }
 function formData() {
   const f = $('#form').elements;
+  const mode = f.audMode.value;
+  const years = mode === 'years' ? [...document.querySelectorAll('#yearBoxes input:checked')].map((c) => c.value) : [];
   return { title: f.title.value.trim(), type: f.type.value, status: f.status.value, date: f.date.value, end: f.end.value,
-    where: f.where.value.trim(), audience: f.audience.value, body: f.body.value.trim(), pinned: f.pinned.checked };
+    where: f.where.value.trim(), years, staffOnly: mode === 'staff', body: f.body.value.trim(), pinned: f.pinned.checked };
 }
 function preview() {
   const d = formData();
+  syncAudience();
+  $('#schedBox').hidden = d.type !== 'exam';
   $('#pImg').className = 'img ' + d.type;
-  setPhotoPreview();
+  updateCover();
   $('#pType').className = 'pill ' + d.type; $('#pType').textContent = TYPE[d.type];
   $('#pStatus').className = 'st ' + d.status; $('#pStatus').textContent = STATUS[d.status];
   $('#pTitle').textContent = d.title || 'Untitled announcement';
-  $('#pMeta').textContent = (d.date ? '📅 ' + range(d) : '📅 No date') + (d.where ? '  ·  📍 ' + d.where : '');
+  $('#pMeta').textContent = (d.date ? '📅 ' + range(d) : '📅 No date') + (d.where ? '  ·  📍 ' + d.where : '')
+    + (d.type === 'exam' && schedules.length ? `  ·  🗓 ${schedules.length} schedule${schedules.length > 1 ? 's' : ''}` : '')
+    + (gallery.length > 1 ? `  ·  📷 ${gallery.length}` : '');
   $('#pBody').textContent = d.body || 'Details will appear here.';
-  $('#pAud').textContent = 'Audience: ' + d.audience + (d.pinned ? ' · 📌 Pinned' : '');
+  $('#pAud').textContent = 'Visible to: ' + audienceLabel(d) + (d.pinned ? ' · 📌 Pinned' : '');
 }
 $('#form').addEventListener('input', preview);
+$('#form').addEventListener('change', preview);
+$('#addSched').addEventListener('click', preview);
+$('#schedRows').addEventListener('click', preview);
 $('#form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const err = (m) => { $('#formErr').textContent = m; };
   const d = formData();
-  if (!d.title) return ($('#formErr').textContent = 'Please add a title.');
-  if (!d.date) return ($('#formErr').textContent = 'Please choose a start date.');
-  if (d.end && d.end < d.date) return ($('#formErr').textContent = 'End date can’t be before the start date.');
+  if (!d.title) return err('Please add a title.');
+  if (!canManageType(me, d.type)) return err(`Your role can’t publish ${TYPE[d.type].toLowerCase()} announcements.`);
+  if (d.years.length === 0 && $('#form').elements.audMode.value === 'years') return err('Tick at least one year level, or choose “All students”.');
+  // Exam schedules: every row needs a subject and a date; the announcement spans them.
+  const sched = d.type === 'exam' ? schedules.map((x) => ({ subject: x.subject.trim(), date: x.date, start: x.start, end: x.end, room: (x.room || '').trim() })) : [];
+  for (let i = 0; i < sched.length; i++) {
+    const x = sched[i];
+    if (!x.subject) return err(`Schedule ${i + 1} needs a subject.`);
+    if (!x.date) return err(`Schedule ${i + 1} needs a date.`);
+    if (x.start && x.end && x.end <= x.start) return err(`Schedule ${i + 1}: the end time must be after the start time.`);
+  }
+  if (sched.length) {
+    const ds = sched.map((x) => x.date).sort();
+    d.date = ds[0]; d.end = ds[ds.length - 1];
+  }
+  if (!d.date) return err('Please choose a start date.');
+  if (d.end && d.end < d.date) return err('End date can’t be before the start date.');
   if (d.end === d.date) d.end = '';
+  d.schedules = sched;
+
   const btn = $('#formSubmit'); btn.disabled = true;
-  const old = photo.current;
-  let uploaded = '';
+  const uploaded = [];
   try {
-    if (photo.blob) { $('#formErr').textContent = 'Uploading photo…'; uploaded = d.image = await api.uploadImage(photo.blob); }
-    else if (photo.removed) d.image = '';
-    else d.image = old;
-    $('#formErr').textContent = '';
+    const toUpload = gallery.filter((g) => g.blob).length;
+    const paths = [];
+    for (const g of gallery) {
+      if (g.blob) { err(`Uploading photo ${uploaded.length + 1} of ${toUpload}…`); const path = await api.uploadImage(g.blob); uploaded.push(path); paths.push(path); }
+      else paths.push(g.path);
+    }
+    d.photos = paths;
+    err('Saving…');
     await api.saveAnnouncement(editingId ? { id: editingId, ...d } : d);
-    if (old && d.image !== old) await cleanupImages([old], items.filter((x) => x.id !== editingId));
-    uploaded = '';
+    const removed = originalPhotos.filter((p) => !paths.includes(p));
+    if (removed.length) await cleanupImages(removed, items.filter((x) => x.id !== editingId));
+    uploaded.length = 0;
+    err('');
     api.log(editingId ? `Edited “${d.title}”` : `${d.status === 'draft' ? 'Drafted' : 'Published'} “${d.title}”`);
     $('#editDlg').close();
-    toast(editingId ? 'Changes saved' : d.status === 'draft' ? 'Saved as draft' : 'Published to students');
+    toast(editingId ? 'Changes saved' : d.status === 'draft' ? 'Saved as draft' : `Published to ${audienceLabel(d) === 'All students' ? 'all students' : audienceLabel(d)}`);
     await refresh();
-  } catch (err) {
-    $('#formErr').textContent = 'Couldn’t save: ' + err.message;
-    if (uploaded) api.deleteImage(uploaded); // don't leave an orphaned upload behind
+  } catch (ex) {
+    err('Couldn’t save: ' + ex.message);
+    uploaded.forEach((p) => api.deleteImage(p)); // don't leave orphaned uploads behind
   }
   finally { btn.disabled = false; }
 });
+$('#editDlg').addEventListener('close', clearGallery);
 
 /* ---------- sign-up list ---------- */
 let suItem = null, suPeople = [], suSample = 0;
@@ -907,8 +1171,9 @@ $('#suYear').addEventListener('change', (e) => { e.stopPropagation(); renderSign
 /* ---------- CSV export ---------- */
 function exportCsv() {
   const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const rows = [['Title', 'Type', 'Status', 'Start', 'End', 'Location', 'Audience', 'Pinned', 'Sign-ups', 'Details']]
-    .concat(tableItems().map((a) => [a.title, TYPE[a.type], STATUS[statusOf(a)], a.date, a.end || '', a.where, a.audience, a.pinned ? 'Yes' : 'No', signups(a), a.body]));
+  const rows = [['Title', 'Type', 'Status', 'Start', 'End', 'Location', 'Visible to', 'Pinned', 'Sign-ups', 'Exam schedules', 'Photos', 'Details']]
+    .concat(tableItems().map((a) => [a.title, TYPE[a.type], STATUS[statusOf(a)], a.date, a.end || '', a.where, audienceLabel(a), a.pinned ? 'Yes' : 'No', signups(a),
+      (a.schedules || []).map((x) => `${x.subject} ${x.date}${x.start ? ' ' + x.start + (x.end ? '-' + x.end : '') : ''}${x.room ? ' ' + x.room : ''}`).join('; '), (a.photos || []).length, a.body]));
   const url = URL.createObjectURL(new Blob([rows.map((r) => r.map(cell).join(',')).join('\r\n')], { type: 'text/csv' }));
   const link = Object.assign(document.createElement('a'), { href: url, download: 'cici-announcements.csv' });
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -923,6 +1188,8 @@ document.addEventListener('click', async (e) => {
   const su = t.closest('[data-signups]'); if (su) return openSignups(su.dataset.signups);
   const ed = t.closest('[data-edit]'); if (ed) return openEditor(byId(ed.dataset.edit));
   const nd = t.closest('[data-newon]'); if (nd) return openEditor(null, { date: nd.dataset.newon });
+  const yf = t.closest('[data-yfilter]');
+  if (yf) { $('#uYear').value = $('#uYear').value === yf.dataset.yfilter ? '' : yf.dataset.yfilter; return renderUsers(); }
   const st = t.closest('[data-stat]');
   if (st) {
     const k = st.dataset.stat;
@@ -936,17 +1203,20 @@ document.addEventListener('click', async (e) => {
   switch (b.dataset.act) {
     case 'new': return openEditor(null);
     case 'edit': return openEditor(a);
-    case 'pin': return run(async () => { await api.updateAnnouncements([a.id], { pinned: !a.pinned }); api.log(`${a.pinned ? 'Unpinned' : 'Pinned'} “${a.title}”`); }, a.pinned ? 'Unpinned' : 'Pinned');
+    case 'pin': if (!canManage(a)) return; return run(async () => { await api.updateAnnouncements([a.id], { pinned: !a.pinned }); api.log(`${a.pinned ? 'Unpinned' : 'Pinned'} “${a.title}”`); }, a.pinned ? 'Unpinned' : 'Pinned');
     case 'toggle': {
+      if (!canManage(a)) return;
       const next = a.status === 'draft' ? 'published' : 'draft';
       return run(async () => { await api.updateAnnouncements([a.id], { status: next }); api.log(`${next === 'draft' ? 'Unpublished' : 'Published'} “${a.title}”`); },
         next === 'draft' ? 'Moved to draft — hidden from students' : 'Published to students');
     }
     case 'dup': {
+      if (!canManage(a)) return;
       const { id, created, signups: _s, ...rest } = a;
       return run(async () => { await api.saveAnnouncement({ ...rest, title: (a.title + ' (copy)').slice(0, 80), status: 'draft', pinned: false }); api.log(`Duplicated “${a.title}”`); }, 'Duplicated as draft');
     }
     case 'del':
+      if (!canManage(a)) return;
       if (!confirm(`Delete “${a.title}”? Students will no longer see it.`)) return;
       selected.delete(a.id);
       return run(async () => { await removeAnnouncements([a]); api.log(`Deleted “${a.title}”`); }, 'Deleted');
@@ -993,6 +1263,8 @@ document.addEventListener('click', async (e) => {
       try { await navigator.clipboard.writeText($('#pwValue').textContent); toast('Password copied'); }
       catch { toast('Select the password and copy it'); }
       return;
+    case 'uedit': return openUserEditor(u);
+    case 'udelete': return deleteUser(u);
     case 'uactive':
       if (u.active && !confirm(`Suspend ${u.name}? They won’t be able to sign in or see announcements.`)) return;
       return run(async () => { await api.updateProfile(u.id, { active: !u.active }); api.log(`${u.active ? 'Suspended' : 'Reactivated'} ${u.name}`); }, u.active ? 'User suspended' : 'User reactivated');
@@ -1009,11 +1281,8 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', async (e) => {
   const t = e.target;
   if (t.dataset.sel) { const id = +t.dataset.sel; t.checked ? selected.add(id) : selected.delete(id); return renderTable(); }
-  if (t.id === 'selAll') { tableItems().forEach((a) => (t.checked ? selected.add(a.id) : selected.delete(a.id))); return renderTable(); }
-  if (t.dataset.role) {
-    const u = users.find((x) => x.id == t.dataset.role), role = t.value;
-    return run(async () => { await api.updateProfile(u.id, { role }); api.log(`Changed ${u.name} to ${roleLabel(role)}`); }, `${u.name} is now ${roleLabel(role)}`);
-  }
+  if (t.id === 'selAll') { tableItems().filter(canManage).forEach((a) => (t.checked ? selected.add(a.id) : selected.delete(a.id))); return renderTable(); }
+
   if (t.id === 'sAud') { cfg.audience = t.value; saveCfg(); return toast('Default audience saved'); }
   if (t.id === 'sDraft') { cfg.draftFirst = t.checked; saveCfg(); return toast('Saved'); }
   if (['fType', 'fStatus', 'fSort', 'uRole', 'uYear'].includes(t.id)) render();
