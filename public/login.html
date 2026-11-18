@@ -92,7 +92,6 @@ form[hidden]{display:none}
         <option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option>
       </select></label>
       <label>Password <span style="font-weight:400">(at least 8 characters, with a letter and a number)</span><input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
-      <label>Confirm password<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Create account</button>
     </form>
 
@@ -179,7 +178,6 @@ $('#fUp').addEventListener('submit', (e) => {
   if (!year) problems.push('your current year level');
   if (problems.length) return msg('Please enter ' + problems.join(', ') + '.');
   if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) return msg('Password must be at least 8 characters and include a letter and a number.');
-  if (password !== f.password2.value) return msg('The two passwords don’t match.');
   busy(e.target, async () => {
     const { needsConfirm } = await api.signUp(name, email, password, year);
     if (needsConfirm) { show('in'); msg('Account created! Check your email to confirm it, then sign in.', 'ok'); }

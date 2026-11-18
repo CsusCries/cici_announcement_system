@@ -65,7 +65,14 @@ export const canManageType = (u, type) => !!u && (u.role === 'admin' || u.role =
 export const initials = (name) => (name || '?').split(/\s+/).filter((w) => /^[A-Za-z]/.test(w) && !w.endsWith('.')).map((w) => w[0].toUpperCase()).slice(0, 2).join('') || '?';
 
 const base = () => location.origin + location.pathname.replace(/[^/]*$/, '');
-const fail = (error) => { if (error) throw new Error(error.message || String(error)); };
+// "Failed to fetch" means the browser couldn't reach Supabase at all: explain what to check.
+export const OFFLINE_MSG = 'Can’t reach the server right now. Check your internet connection, or turn off any ad blocker or VPN for this site, then try again. If it keeps happening, an admin should check that the Supabase project isn’t paused.';
+const isNetworkError = (m) => /failed to fetch|networkerror|network request failed|load failed|fetch failed|err_internet|err_name_not_resolved/i.test(m || '');
+const fail = (error) => {
+  if (!error) return;
+  const m = error.message || String(error);
+  throw new Error(isNetworkError(m) ? OFFLINE_MSG : m);
+};
 
 /* ---------------- mapping between DB rows and page objects ---------------- */
 // Old posts stored one audience label; turn it into the year list used now.
@@ -170,7 +177,10 @@ export const api = {
     if (!live) return (meCache = demoMe());
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return (meCache = null);
-    const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    let res;
+    try { res = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(); }
+    catch (e) { fail(e); }
+    const { data, error } = res;
     fail(error);
     if (!data) throw new Error('Your account isn’t fully set up yet (no profile). Please ask an administrator to fix your account.');
     return (meCache = fromProfile(data));
@@ -206,7 +216,7 @@ export const api = {
         throw e;
       }
       if (m.includes('invalid login credentials')) throw new Error('Wrong email or password. If you forgot your password, use “Forgot password?”.');
-      fail(error);
+      fail(error); // includes the "can't reach the server" message for network failures
     }
     let me = null;
     try { me = await this.currentUser(); }
