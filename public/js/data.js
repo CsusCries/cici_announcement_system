@@ -71,8 +71,12 @@ const isNetworkError = (m) => /failed to fetch|networkerror|network request fail
 const fail = (error) => {
   if (!error) return;
   const m = error.message || String(error);
-  throw new Error(isNetworkError(m) ? OFFLINE_MSG : m);
+  if (isNetworkError(m)) throw new Error(OFFLINE_MSG);
+  if (/rate limit|too many requests|only request this after/i.test(m)) throw new Error(RATE_LIMIT_MSG);
+  throw new Error(m);
 };
+// Supabase's built-in email service only sends a few emails per hour per project.
+export const RATE_LIMIT_MSG = 'Too many sign-up or reset emails were sent in the last hour, so the server is pausing new ones. Please wait a while and try again, or ask an administrator to create or unlock your account.';
 
 /* ---------------- mapping between DB rows and page objects ---------------- */
 // Old posts stored one audience label; turn it into the year list used now.
