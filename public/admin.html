@@ -547,6 +547,11 @@ import { loadSite, applySite, cleanSite, contrastWithWhite, DEFAULT_SITE, COLOR_
 
 /* ---------- sign-in gate: admins and faculty only ---------- */
 const me = await api.requireUser({ staff: true });
+// Follow sign-in changes made in other tabs: signed out → sign-in page; another account → reload.
+api.onSessionChange((uid) => {
+  if (!uid) location.replace('login.html?msg=signedout');
+  else if (uid !== me.id) location.reload();
+});
 let site = await loadSite();
 
 /* ---------- helpers ---------- */

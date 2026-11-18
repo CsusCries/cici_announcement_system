@@ -277,6 +277,31 @@ export const api = {
 
   onRecovery(cb) { if (live) sb.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') cb(); }); },
 
+  // Calls cb(userId or null) whenever the signed-in account changes in ANY tab of this browser
+  // (sign-out, or signing in as someone else), so every open page can follow along.
+  onSessionChange(cb) {
+    let last;
+    const report = (id) => { id = id || null; if (id !== last) { last = id; cb(id); } };
+    if (!live) {
+      last = local.get('session', null)?.id || null;
+      window.addEventListener('storage', (e) => { if (e.key === 'cici.session') report(local.get('session', null)?.id); });
+      return;
+    }
+    sb.auth.getSession().then(({ data }) => {
+      last = data.session?.user?.id || null;
+      // supabase-js tells other tabs about sign-in/sign-out (BroadcastChannel)...
+      sb.auth.onAuthStateChange((event, session) => report(session?.user?.id));
+      // ...and the saved login itself lives in localStorage, so also watch it directly.
+      window.addEventListener('storage', (e) => {
+        if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) {
+          let id = null;
+          try { id = JSON.parse(e.newValue || 'null')?.user?.id || null; } catch {}
+          report(id);
+        }
+      });
+    });
+  },
+
   // After opening a reset link: is there a session that allows setting a new password?
   async hasRecoverySession() {
     if (!live) return false;

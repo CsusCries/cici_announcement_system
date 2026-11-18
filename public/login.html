@@ -139,9 +139,14 @@ async function busy(form, fn) {
   const b = form.querySelector('[type=submit]'); b.disabled = true;
   try { await fn(); } catch (e) { msg(e.message); } finally { b.disabled = false; }
 }
+let goingIn = false; // sign-in and the cross-tab listener can both trigger this; navigate once
 async function goIn() {
-  const me = await api.currentUser();
-  location.replace(nextPage || (isStaff(me) ? 'admin.html' : 'index.html'));
+  if (goingIn) return;
+  goingIn = true;
+  try {
+    const me = await api.currentUser();
+    location.replace(nextPage || (isStaff(me) ? 'admin.html' : 'index.html'));
+  } catch (e) { goingIn = false; throw e; }
 }
 const emailOk = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
@@ -213,6 +218,8 @@ const hashParams = new URLSearchParams(location.hash.slice(1));
 const isRecovery = params.get('reset') === '1' || hashParams.get('type') === 'recovery';
 const linkError = hashParams.get('error_description') || params.get('error_description');
 api.onRecovery(() => show('new'));
+// Signed in from another tab while this sign-in page is open → go straight in.
+api.onSessionChange((uid) => { if (uid && !isRecovery) goIn(); });
 if (isRecovery) {
   if (linkError) {
     show('reset');

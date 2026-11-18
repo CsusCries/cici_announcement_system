@@ -376,6 +376,11 @@ import { loadSite } from './js/site.js';
 
 /* ---------- sign-in gate ---------- */
 const me = await api.requireUser();
+// Follow sign-in changes made in other tabs: signed out → sign-in page; another account → reload.
+api.onSessionChange((uid) => {
+  if (!uid) location.replace('login.html?msg=signedout');
+  else if (uid !== me.id) location.reload();
+});
 
 /* ---------- constants ---------- */
 const TYPE = { event: 'Events', activity: 'Activities', exam: 'Exams', saved: 'Saved', mine: 'My list' };
