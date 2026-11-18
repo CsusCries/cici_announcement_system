@@ -86,23 +86,18 @@ export function applySite(site) {
     el.style.backgroundImage = logoUrl ? `url("${logoUrl}")` : '';
   });
 
-  // Colour: derive the lighter and darker shades from the main colour.
+  // Colour: one shared builder (js/theme-early.js), so the early and late passes match exactly.
   let style = document.getElementById('site-theme');
   if (!style) { style = document.createElement('style'); style.id = 'site-theme'; document.head.append(style); }
   const c = site.color;
-  const mix = (pct, other) => `color-mix(in srgb, ${c} ${pct}%, ${other})`;
-  style.textContent = `
-    .mark.has-logo { background-color: #fff !important; background-position: center !important; background-size: contain !important; background-repeat: no-repeat !important; box-shadow: 0 0 0 1px var(--border) !important; border-radius: 12px !important; }
-    ${c === DEFAULT_COLOR ? '' : `
-    :root { --blue-600: ${c}; --blue: ${mix(85, '#000')}; --blue-d: ${mix(55, '#000')}; --blue-100: ${mix(14, '#fff')}; --blue-50: ${mix(5, '#fff')}; }
-    .hero, .brand { background: linear-gradient(110deg, ${mix(80, '#000')}, ${c} 55%, ${mix(65, '#fff')}) !important; }
-    .side { background: linear-gradient(180deg, ${mix(3, '#fff')}, ${mix(8, '#fff')}); }
-    .nav button.on { box-shadow: 0 6px 16px ${mix(25, 'transparent')} !important; }
-    .logo .mark:not(.has-logo) { background: radial-gradient(circle, #fff 0 22%, var(--blue) 23% 100%); box-shadow: 0 0 0 6px var(--blue-100) inset; }
-    .brand .mark:not(.has-logo) { background: radial-gradient(circle, var(--blue) 0 22%, #fff 23% 100%); }`}
-  `;
+  style.textContent = window.ciciThemeCss ? window.ciciThemeCss(c) : '';
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = c === DEFAULT_COLOR ? '#1d4ed8' : c;
+  if (meta) meta.content = window.ciciThemeMeta ? window.ciciThemeMeta(c) : c;
+}
+
+// Remember the content on this device so the next page load can show it before anything is drawn.
+export function rememberSite(site) {
+  try { localStorage.setItem('cici.siteCache', JSON.stringify({ ...site, logoUrl: site.logo ? api.imageUrl(site.logo) : '' })); } catch {}
 }
 
 // Show the last-seen content straight away (no flash of the defaults),
@@ -115,7 +110,7 @@ export async function loadSite() {
   try {
     site = cleanSite(await api.getSiteContent());
     applySite(site);
-    try { localStorage.setItem('cici.siteCache', JSON.stringify(site)); } catch {}
+    rememberSite(site);
   } catch { /* table not created yet or offline: keep what we have */ }
   return site;
 }

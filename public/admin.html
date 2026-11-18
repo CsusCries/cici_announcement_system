@@ -265,6 +265,7 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
 </style>
 <link rel="stylesheet" href="css/mobile.css">
 <script src="config.js"></script>
+<script src="js/theme-early.js"></script>
 </head>
 <body>
 <div class="app">
@@ -543,7 +544,7 @@ input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--bord
 <script type="module">
 import { api, isAdmin, roleLabel, initials, canManageType, audienceLabel, YEARS, ROLES } from './js/data.js';
 import { openLightbox } from './js/lightbox.js';
-import { loadSite, applySite, cleanSite, contrastWithWhite, DEFAULT_SITE, COLOR_PRESETS, SLIDE_TARGETS, LIMITS } from './js/site.js';
+import { loadSite, applySite, cleanSite, contrastWithWhite, rememberSite, DEFAULT_SITE, COLOR_PRESETS, SLIDE_TARGETS, LIMITS } from './js/site.js';
 
 /* ---------- sign-in gate: admins and faculty only ---------- */
 const me = await api.requireUser({ staff: true });
@@ -896,7 +897,7 @@ async function publishSite(next, message) {
   await api.saveSiteContent(next);
   if (oldLogo && oldLogo !== next.logo) await api.deleteImage(oldLogo);
   site = next; applySite(site);
-  try { localStorage.setItem('cici.siteCache', JSON.stringify(site)); } catch {}
+  rememberSite(site);
   api.log(message); toast(message); fillSiteForm();
 }
 siteForm.addEventListener('submit', async (e) => {
